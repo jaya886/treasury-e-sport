@@ -1,0 +1,193 @@
+---
+// Tournament info strip with the total prize pool (counts up when scrolled into view).
+import { tournament, tournamentFacts, formatRupiah } from '../data/tournament';
+import type { Locale } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const total = formatRupiah(tournament.prizePool);
+---
+
+<section class="prize wrap" aria-labelledby="prize-title">
+  <div class="prize__card glass hud-corners">
+    <div class="prize__pool">
+      <div class="prize__trophy" aria-hidden="true">🏆</div>
+      <div>
+        <p id="prize-title" class="hud hud--yellow">// Total hadiah TEC 2026</p>
+        <p class="prize__amount display" data-prize={tournament.prizePool} aria-label={`${total},-`}>
+          <span data-prize-value>{total}</span><span class="prize__dash">,-</span>
+        </p>
+        <p class="prize__note">Untuk seluruh cabang game</p>
+      </div>
+    </div>
+    <ul class="prize__facts">
+      {
+        tournamentFacts[locale].map((f) => (
+          <li>
+            <span class="prize__icon" aria-hidden="true">{f.icon}</span>
+            <span>
+              <span class="hud">{f.label}</span>
+              <b>{f.value}</b>
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<script>
+  const el = document.querySelector<HTMLElement>('[data-prize]');
+  const out = el?.querySelector<HTMLElement>('[data-prize-value]');
+  if (el && out && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const target = Number(el.dataset.prize);
+    const fmt = (n: number) => `Rp${Math.round(n).toLocaleString('id-ID')}`;
+    out.textContent = fmt(0);
+    const io = new IntersectionObserver((entries) => {
+      if (!entries[0].isIntersecting) return;
+      io.disconnect();
+      const start = performance.now();
+      const dur = 1600;
+      const tick = (now: number) => {
+        const p = Math.min(1, (now - start) / dur);
+        out.textContent = fmt(target * (1 - Math.pow(1 - p, 3)));
+        if (p < 1) requestAnimationFrame(tick);
+        else el.classList.add('is-done');
+      };
+      requestAnimationFrame(tick);
+    });
+    io.observe(el);
+  }
+</script>
+
+<style>
+  .prize {
+    padding-top: clamp(28px, 4vw, 48px);
+  }
+
+  .prize__card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: center;
+    gap: 24px 40px;
+    padding: clamp(20px, 3vw, 32px);
+    background:
+      radial-gradient(70% 120% at 0% 50%, rgb(255 188 0 / 0.16), transparent 70%),
+      linear-gradient(180deg, rgb(255 255 255 / 0.075), rgb(255 255 255 / 0.025));
+    border-color: rgb(255 188 0 / 0.35);
+  }
+
+  .prize__pool {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .prize__trophy {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    font-size: 2.4rem;
+    background: radial-gradient(circle at 35% 30%, #fff3c4, var(--yellow) 55%, #c98f00);
+    box-shadow:
+      0 0 0 6px rgb(255 188 0 / 0.15),
+      0 0 40px rgb(255 188 0 / 0.45);
+    animation: trophy 2.4s ease-in-out infinite;
+  }
+
+  @keyframes trophy {
+    50% {
+      transform: translateY(-4px) rotate(-6deg);
+    }
+  }
+
+  .prize__amount {
+    margin: 4px 0 2px;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    color: var(--yellow);
+    text-shadow: 0 0 32px rgb(255 188 0 / 0.5);
+    font-variant-numeric: tabular-nums;
+    text-transform: none;
+    white-space: nowrap;
+  }
+
+  .prize__amount.is-done {
+    animation: prize-flash 0.6s ease;
+  }
+
+  @keyframes prize-flash {
+    50% {
+      text-shadow: 0 0 60px rgb(255 188 0 / 0.95);
+      transform: scale(1.03);
+    }
+  }
+
+  .prize__dash {
+    font-size: 0.55em;
+    opacity: 0.8;
+  }
+
+  .prize__note {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .prize__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 22px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .prize__facts li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .prize__icon {
+    font-size: 1.3rem;
+    line-height: 1.4;
+  }
+
+  .prize__facts .hud {
+    display: block;
+    font-size: 0.68rem;
+  }
+
+  .prize__facts b {
+    display: block;
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
+
+  @media (max-width: 900px) {
+    .prize__card {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .prize__pool {
+      gap: 14px;
+    }
+
+    .prize__trophy {
+      width: 58px;
+      height: 58px;
+      font-size: 1.8rem;
+    }
+
+    .prize__facts {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
