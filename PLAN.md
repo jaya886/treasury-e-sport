@@ -1,11 +1,11 @@
 # TEC Discord Guide — Project Plan
 
-> Status: **Draft v1** — planning phase. Items marked **[OPEN]** need a decision before they are built.
+> Status: **Draft v2** — planning phase. Items marked **[OPEN]** need a decision before they are built.
 
 ## 1. Purpose
 
-A guide website that teaches participants of the Treasury E-Sport Competition (TEC) how to use the
-**Treasury E-Sport Community** Discord server for the competition:
+A guide website that teaches participants of the Treasury E-Sport Community's 2026 competition how to use the
+**Treasury E-Sport Community** (TEC) Discord server for the competition. Site name: **TEC 2026**.
 
 1. **Finding their match schedule** (primary)
 2. **Self match-reporting** in per-match threads (primary)
@@ -20,7 +20,8 @@ on-ramp: get Treasury employees into Discord and comfortable there.
 
 - Treasury (DJPb) employees only, from offices all over Indonesia (WIB / WITA / WIT).
 - Many have **never used Discord** (especially the chess community) → assume zero knowledge.
-- Likely mobile-heavy → design mobile-first, but cover desktop too.
+- Participants have both phone and laptop → every walkthrough has an **HP / Laptop** toggle; layouts mobile-first.
+- Invites are sent **individually** by panitia (no permanent public link).
 
 ### Scope
 
@@ -39,8 +40,8 @@ on-ramp: get Treasury employees into Discord and comfortable there.
 | PUBG Mobile | Online, team | `#pubgm` | **[OPEN]** Reporting flow pending PIC (battle-royale lobbies ≠ 1v1) |
 | Magic Chess: Go Go | Online, solo | `#magic-chess-go-go` | |
 | Dota 2 | Online, team | `#dota2` | Match ID available in-game |
-| FC 27 | **Offline** | `#bola` (?) | **[OPEN]** Does FC 27 use Discord reporting at all? |
-| Chess (lichess.org) | Online, solo | `#literally-catur` | Game URL acts as match ID |
+| FC 27 | **Offline** | — | Played offline; Discord reporting not expected. Guide covers announcements/support only |
+| Chess (lichess.org) | Online, solo | `#literally-catur` | **[OPEN]** Individual games (game URL = proof) vs lichess Swiss tournament (auto results) — decide with chess PIC |
 
 ## 2. Current Discord server (as of screenshots)
 
@@ -61,63 +62,76 @@ bots: Dyno, Tatsu.
 - No role marks someone as a *competition participant* or as *panitia/PIC*.
 - `valorant` role has no matching channel / game in the competition.
 
-## 3. Proposed Discord additions (for the competition)
+## 3. Competition setup on Discord (agreed)
 
-The guide can only be as clear as the server, so we lock the server structure first.
+### 3.1 `#tec-competition` becomes a single **Forum channel** — the home of every match thread
 
-### 3.1 Category `🏆 TEC` (new)
+Discord cannot convert a text channel into a forum, so `#tec-competition` (currently empty) is
+deleted and re-created as a Forum channel with the same name, under **Informasi**.
 
-| Channel | Type | Who posts | Purpose |
-|---|---|---|---|
-| `#jadwal-tec` | Announcement | Panitia | Round schedules & time windows |
-| `#laga-mlbb`, `#laga-dota2`, `#laga-mcgg`, `#laga-pubgm`, `#laga-catur`, `#laga-fc27` | **Forum** | Panitia creates posts; participants reply | **One forum post = one match thread** |
-| `#support-dan-usulan` (existing) | Text | Everyone | Public help |
-| `#pengumuman` (existing) | Announcement | Admin | General announcements |
+- **One forum post = one match thread**, created by PIC/Admin only.
+- **Public**: everyone can read every match (transparency).
+- Permissions: `@everyone` → *Send Messages in Posts* ✅, *Create Posts* ❌; `PIC` & `Admin` → *Create Posts*, *Manage Threads*.
+- **Tags** (forum supports up to 20; max 5 per post):
+  - Game: `MLBB` · `PUBGM` · `MCGG` · `Dota 2` · `Catur` · `FC 27`
+  - Status (moderator-only): `Terjadwal` · `Menunggu Laporan` · `Selesai` · `Sengketa` · `WO`
+- **Pinned post** at the top: "📌 Mulai di sini — cara lapor & jadwal ronde" (links to this site).
+- Title convention: `[MLBB] R1 · Nama Tim A vs Nama Tim B` → searchable by team name.
+- PIC **@mentions** the players in the opening message → they are added to the thread automatically,
+  so the match appears in **their own sidebar** and they get notifications. This is the main answer to
+  "how do I find my schedule?".
 
-**Why Forum channels for match threads**
-
-- Each post *is* a thread → exactly the "one thread per match" idea.
-- Discord separates *Create Posts* from *Send Messages in Posts* permissions → only panitia creates
-  matches, participants can only reply. No clutter.
-- **Tags** give each match a visible status: `Terjadwal` · `Menunggu Laporan` · `Selesai` · `Sengketa` · `WO`.
-- Searchable and filterable by tag; participants can "Follow" their post to get notified.
-
-**Match post template (created by panitia)**
+### 3.2 Match post template (written by PIC)
 
 ```
-Judul: [R1] Kanwil DJPb Sulsel vs Kanwil DJPb Jatim
+[MLBB] R1 · Garuda Perbendaharaan vs Kanwil Sulsel Squad
 Peserta: @kapten-a @kapten-b (+ anggota)
-Jendela waktu: <t:START:F> s/d <t:END:F>
+Jendela main: <t:START:F> s/d <t:END:F>
 Format: Bo3
 Batas lapor: <t:DEADLINE:R>
-Cara lapor: (link ke panduan)
+Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil
 ```
 
-Discord timestamps (`<t:unix:F>`) render **in each viewer's own time zone**, which solves
-WIB / WITA / WIT confusion automatically. The guide will teach participants to trust these.
+Discord timestamps (`<t:unix:F>`) render **in each viewer's own time zone** → no WIB / WITA / WIT
+conversion needed. The guide teaches participants to trust these.
 
-**Report template (posted by both sides)**
+### 3.3 Reporting inside the match thread
+
+Both sides are responsible. Either way is accepted:
+
+- **A. Report + confirm (taught as the default, easiest):** one side posts the report; the other side
+  reacts ✅ to agree (or replies "❌ tidak setuju" → dispute).
+- **B. Both report:** each side posts its own report.
 
 ```
 HASIL LAGA
-Tim/Pemain: Kanwil DJPb Sulsel
+Tim/Pemain: Garuda Perbendaharaan
 Skor: 2 - 1 (menang)
-Match ID: 123456789   ← or lichess link for chess
-[screenshot(s) attached]
+Match ID: 123456789        ← lichess link for chess
+[screenshot: skor + pemenang + match ID]
 ```
 
-### 3.2 Roles (proposed additions)
+- **Dispute**: discussed in the same thread; PIC sets tag `Sengketa` and decides.
+- **No report by the deadline**: PIC checks the result themselves where the game allows it;
+  otherwise both sides are counted as WO (consequence depends on format — **[OPEN]**).
+- **PUBGM**: multi-team lobbies → flow **[OPEN]**, pending PIC.
 
-| Role | Purpose |
+### 3.4 Other channels used by the guide
+
+| Purpose | Channel |
 |---|---|
-| `Peserta TEC` | Can see/reply in `#laga-*` forums |
-| `Kapten Tim TEC` (exists) | Team contact person |
-| `Panitia TEC` / `PIC <game>` | Create match posts, set tags, resolve disputes |
-| Game roles (exist) | Mentions & per-game notifications |
+| General announcements | `#pengumuman` |
+| Help (public) | `#support-dan-usulan` |
+| Rules | `#rules` |
+| Match threads & schedule | `#tec-competition` (forum) |
 
-### 3.3 Nickname convention (proposed)
+### 3.5 Roles & names
 
-`Nama Panggilan | Satker` — e.g. `Budi | Kanwil Sulsel`. Lets panitia and opponents identify people.
+- **No participant role** — everyone can reply in match threads.
+- **`PIC`** — one universal role for all game PICs.
+- Other game roles are placeholders for the future community; not used by the guide.
+- Teams choose their own names, and one office may have several teams → nicknames carry the office:
+  `Nama | Satker` (e.g. `Budi | KPPN Makassar I`, max 32 chars).
 
 ## 4. Site information architecture (Bahasa Indonesia)
 
@@ -128,9 +142,9 @@ supergraphic. Progress is saved in the browser.
 |---|---|---|---|
 | — | `/` | Beranda | What TEC is, why Discord, "Mulai Misi" + "Gabung Discord" |
 | 0 | `/misi/kenalan-discord` | Kenalan dengan Discord | What Discord is; install (HP/laptop); create & verify account |
-| 1 | `/misi/masuk-server` | Masuk Server | Invite link, onboarding, roles, nickname format |
+| 1 | `/misi/masuk-server` | Masuk Server | Open your personal invite (expires!), onboarding, nickname format |
 | 2 | `/misi/tur-server` | Tur Server | Interactive channel map: tap a channel → what it is for |
-| 3 | `/misi/cari-jadwal` | Cari Jadwal Laga | `#jadwal-tec`, find your match post, read timestamps, follow post, notifications |
+| 3 | `/misi/cari-jadwal` | Cari Jadwal Laga | Your match in the sidebar, `#tec-competition` tags & search, reading timestamps, notifications |
 | 4 | `/misi/koordinasi` | Atur Waktu Main | Agree on a time with the opponent inside the match thread |
 | 5 | `/misi/lapor-hasil` | Lapor Hasil | Screenshot → template → upload → wait for the other side |
 | 6 | `/misi/sengketa-wo` | Sengketa & WO | What happens on disagreement / missed deadline |
@@ -138,21 +152,23 @@ supergraphic. Progress is saved in the browser.
 | — | `/game/[slug]` | Cheat sheet per game | Where to find the Match ID & what the screenshot must show |
 | — | `/faq` | FAQ | |
 
-## 5. "Like watching a video" — the Discord Simulator
+## 5. "Like watching a video" — interactive slides with a live Discord view
 
-The core interactive piece. Instead of screen recordings, we render a **mock Discord UI in HTML/CSS**
-and play scripted scenes on it.
+Each mission is an **interactive slide deck**, not a recording.
 
-- **Player controls**: play/pause, scrubber with chapter markers, speed, replay, captions.
-- **Two modes**:
-  - *Tonton* — autoplays like a video (cursor moves, taps, typing, messages appear, highlights).
-  - *Coba Sendiri* — pauses at each step and waits for the user to tap the highlighted element.
-- **Device toggle**: HP / Laptop layouts.
-- **Scenes are data** (`src/scenes/*.ts`): a list of timed actions (`cursor`, `tap`, `type`, `post`,
-  `highlight`, `caption`, `open`). Captions are i18n keys → localizable, unlike a video.
-- Mirrors real channel names, so when the server changes we edit text, not re-record.
+- **Slides**: one idea per slide, a short caption, next / previous, chapter dots, optional autoplay.
+- **Live Discord stage**: a mock Discord UI (HTML/CSS) that *feels alive* — messages type in,
+  members come online, unread badges pulse, notifications pop, the cursor/finger moves and taps,
+  threads open, reactions get added.
+- **Not limited to Discord**: a slide can also show in-game screenshots (where the Match ID is),
+  diagrams (report → confirm → selesai flow), checklists, or a time-zone illustration.
+- **Coba Sendiri**: on action slides the deck waits until the user taps the highlighted element.
+- **HP / Laptop toggle** on every Discord stage.
+- **Scenes are data** (`src/scenes/*.ts`): timed actions (`cursor`, `tap`, `type`, `post`, `react`,
+  `highlight`, `toast`, `open`). Captions are i18n keys → localizable.
+- Mirrors real channel names; when the server changes we edit text, not re-record.
 - No video files → fast on slow office networks.
-- `prefers-reduced-motion` → falls back to a static step-by-step list.
+- `prefers-reduced-motion` → static frames with captions.
 
 ## 6. Visual direction
 
@@ -171,7 +187,7 @@ Kemenkeu logos — pushed toward a game-like, Astro-style "stipple gradient + fr
   yellow dots become checkpoints / the player token. Strokes "draw" in on scroll.
 - **Stipple gradient**: blue/yellow radial glows on navy with a dithered grain overlay.
 - **Frosted glass**: translucent panels with backdrop blur and a thin light border.
-- **Game touches**: mission numbers, XP bar (progress), achievement toast on completing a mission.
+- **Game touches** (level **[OPEN]**): mission numbers, XP bar, achievement toast, optional final quiz.
 - **Accessibility**: yellow never used as text on white; AA contrast; full keyboard support.
 - Wordmark: type-only "TEC" mark (no official logos).
 
@@ -197,4 +213,10 @@ Kemenkeu logos — pushed toward a game-like, Astro-style "stipple gradient + fr
 
 ## 9. Open decisions
 
-See the chat thread; answers will be folded back into this document.
+| # | Decision | Owner | Blocks |
+|---|---|---|---|
+| 1 | Chess: individual lichess games vs lichess Swiss tournament | Chess PIC | Chess cheat sheet |
+| 2 | PUBGM reporting flow | PUBGM PIC | PUBGM cheat sheet |
+| 3 | WO consequences & reschedule rules | Panitia | Misi 6 text |
+| 4 | How much game-style UI (see chat) | Owner | Design detail only |
+| 5 | Competition format & dates | Panitia | Example dates in scenes only |
