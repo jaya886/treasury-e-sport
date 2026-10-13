@@ -1,0 +1,281 @@
+---
+// Quest map: missions sit on the apexes of a striped ribbon (desktop) or along a striped
+// timeline (narrow screens). Completion state is filled in from localStorage on the client.
+import Ribbon from './Ribbon.astro';
+import { meander } from '../lib/ribbon';
+import { useTranslations, type Locale } from '../i18n/ui';
+import type { Mission } from '../data/missions';
+
+interface Props {
+  missions: Mission[];
+  locale: Locale;
+}
+
+const { missions, locale } = Astro.props;
+const t = useTranslations(locale);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const W = 1200;
+const H = 700;
+const r = 60;
+const x = 120;
+const yIn = 360;
+const m = meander({ x, baseline: yIn, r, apexY: missions.map((_, i) => (i % 2 === 0 ? 240 : 460)) });
+const d =
+  `M 0 ${yIn} H ${x - r} A ${r} ${r} 0 0 0 ${x} ${yIn - r}` +
+  m.loops +
+  ` A ${r} ${r} 0 0 1 ${m.endX + r} ${m.lastTurnY - r} H ${W}`;
+---
+
+<div class="map" data-map>
+  <div class="map__ribbon" aria-hidden="true">
+    <Ribbon d={d} viewBox={`0 0 ${W} ${H}`} unit={6} />
+  </div>
+  <ol class="map__list">
+    {
+      missions.map((mi, i) => {
+        const apex = m.apexes[i];
+        return (
+          <li
+            class:list={['map__item', apex.up ? 'is-top' : 'is-bottom', { 'is-soon': !mi.ready }]}
+            style={`--x:${(apex.x / W) * 100}%;--y:${(apex.y / H) * 100}%`}
+            data-slug={mi.slug}
+          >
+            <a class="map__node" href={`${base}/misi/${mi.slug}/`} aria-label={`${t('mission.label')} ${mi.no}: ${mi.title}`}>
+              <span>{String(mi.no).padStart(2, '0')}</span>
+            </a>
+            <a class="map__card glass" href={`${base}/misi/${mi.slug}/`}>
+              <span class="map__meta hud">
+                {t('mission.label')} {String(mi.no).padStart(2, '0')} · {mi.minutes} {t('mission.minutes')}
+              </span>
+              <span class="map__title">{mi.title}</span>
+              <span class="map__blurb">{mi.blurb}</span>
+              <span class="map__status">
+                <span class="map__xp">+{mi.xp} XP</span>
+                <span class="map__state" data-state>
+                  {mi.ready ? t('mission.start') : t('mission.soon')}
+                </span>
+              </span>
+            </a>
+          </li>
+        );
+      })
+    }
+  </ol>
+</div>
+
+<script define:vars={{ doneLabel: t('mission.done') }}>
+  try {
+    const raw = localStorage.getItem('tec2026:progress');
+    const done = raw ? JSON.parse(raw).completed || [] : [];
+    document.querySelectorAll('[data-map] [data-slug]').forEach((li) => {
+      if (done.includes(li.dataset.slug)) {
+        li.classList.add('is-done');
+        li.querySelector('[data-state]').textContent = '✓ ' + doneLabel;
+      }
+    });
+  } catch {
+    /* storage unavailable */
+  }
+</script>
+
+<style>
+  .map {
+    position: relative;
+    aspect-ratio: 1200 / 700;
+    container-type: inline-size;
+  }
+
+  .map__ribbon {
+    position: absolute;
+    inset: 0;
+  }
+
+  .map__ribbon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .map__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .map__item {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    width: 0;
+    height: 0;
+  }
+
+  .map__node {
+    position: absolute;
+    left: -28px;
+    top: -28px;
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--yellow);
+    color: var(--navy-950);
+    font-weight: 900;
+    font-style: italic;
+    font-size: 1.1rem;
+    text-decoration: none;
+    box-shadow:
+      0 0 0 6px rgb(7 8 35 / 0.9),
+      0 0 30px rgb(255 188 0 / 0.55);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 2;
+  }
+
+  .map__node:hover {
+    color: var(--navy-950);
+    transform: scale(1.12);
+  }
+
+  .is-soon .map__node {
+    background: var(--navy-700);
+    color: var(--text-muted);
+    box-shadow:
+      0 0 0 6px rgb(7 8 35 / 0.9),
+      inset 0 0 0 2px var(--line-strong);
+  }
+
+  .is-done .map__node {
+    background: var(--ok);
+    box-shadow:
+      0 0 0 6px rgb(7 8 35 / 0.9),
+      0 0 30px rgb(61 220 151 / 0.6);
+  }
+
+  .map__card {
+    position: absolute;
+    left: 0;
+    width: 19cqw;
+    transform: translateX(-50%);
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
+    color: var(--text);
+    text-decoration: none;
+    transition:
+      transform 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .is-top .map__card {
+    bottom: 44px;
+  }
+
+  .is-bottom .map__card {
+    top: 44px;
+  }
+
+  .map__card:hover {
+    color: var(--text);
+    border-color: var(--yellow);
+    transform: translateX(-50%) translateY(-3px);
+  }
+
+  .map__title {
+    font-weight: 900;
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+
+  .map__blurb {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+  }
+
+  .map__status {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .map__xp {
+    color: var(--yellow);
+  }
+
+  .map__state {
+    color: var(--blue-soft);
+  }
+
+  .is-soon .map__state {
+    color: var(--text-dim);
+  }
+
+  .is-done .map__state {
+    color: var(--ok);
+  }
+
+  /* ---- narrow screens: vertical striped timeline ---- */
+  @media (max-width: 1080px) {
+    .map {
+      aspect-ratio: auto;
+    }
+
+    .map__ribbon {
+      display: none;
+    }
+
+    .map__list {
+      position: relative;
+      display: grid;
+      gap: 18px;
+      padding-left: 74px;
+    }
+
+    .map__list::before {
+      content: '';
+      position: absolute;
+      left: 23px;
+      top: 0;
+      bottom: 0;
+      width: 54px;
+      background: repeating-linear-gradient(90deg, var(--blue-glow) 0 6px, transparent 6px 12px);
+      -webkit-mask-image: linear-gradient(transparent, #000 6%, #000 94%, transparent);
+      mask-image: linear-gradient(transparent, #000 6%, #000 94%, transparent);
+      width: 54px;
+      opacity: 0.85;
+    }
+
+    .map__item {
+      position: relative;
+      left: auto;
+      top: auto;
+      width: auto;
+      height: auto;
+    }
+
+    .map__node {
+      left: -74px;
+      top: 50%;
+      margin-top: -28px;
+    }
+
+    .map__card,
+    .is-top .map__card,
+    .is-bottom .map__card {
+      position: relative;
+      inset: auto;
+      width: auto;
+      transform: none;
+    }
+
+    .map__card:hover {
+      transform: translateY(-2px);
+    }
+  }
+</style>

@@ -1,0 +1,133 @@
+---
+// Striped ribbon supergraphic (5 parallel lines), drawn as a mask so gaps stay transparent
+// over the stipple background. Optional yellow "checkpoint" dots and draw-in animation.
+import { stripeWidths } from '../lib/ribbon';
+
+interface Dot {
+  x: number;
+  y: number;
+  r?: number;
+  front?: boolean;
+}
+
+interface Props {
+  d: string;
+  viewBox: string;
+  unit?: number;
+  lines?: number;
+  dots?: Dot[];
+  animate?: boolean;
+  /** gradient stops along the ribbon */
+  from?: string;
+  to?: string;
+  class?: string;
+  label?: string;
+}
+
+const {
+  d,
+  viewBox,
+  unit = 6,
+  lines = 5,
+  dots = [],
+  animate = true,
+  from = 'var(--blue-glow)',
+  to = 'var(--blue)',
+  class: className = '',
+  label,
+} = Astro.props;
+
+const uid = `rb-${Math.random().toString(36).slice(2, 8)}`;
+const strokes = stripeWidths(lines, unit);
+const [, , vw, vh] = viewBox.split(/\s+/).map(Number);
+const dotR = unit * 3.2;
+---
+
+<svg
+  class:list={['ribbon', { 'ribbon--animate': animate }, className]}
+  viewBox={viewBox}
+  preserveAspectRatio="xMidYMid meet"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+>
+  <defs>
+    <linearGradient id={`${uid}-g`} x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0" stop-color={from}></stop>
+      <stop offset="1" stop-color={to}></stop>
+    </linearGradient>
+    <mask id={`${uid}-m`} maskUnits="userSpaceOnUse" x="0" y="0" width={vw} height={vh}>
+      {
+        strokes.map((s) => (
+          <path
+            d={d}
+            fill="none"
+            stroke={s.on ? '#fff' : '#000'}
+            stroke-width={s.width}
+            pathLength="1"
+            class="ribbon__stroke"
+          />
+        ))
+      }
+    </mask>
+  </defs>
+  {dots.filter((p) => !p.front).map((p) => <circle class="ribbon__dot" cx={p.x} cy={p.y} r={p.r ?? dotR} />)}
+  <rect width={vw} height={vh} fill={`url(#${uid}-g)`} mask={`url(#${uid}-m)`}></rect>
+  {dots.filter((p) => p.front).map((p) => <circle class="ribbon__dot" cx={p.x} cy={p.y} r={p.r ?? dotR} />)}
+</svg>
+
+<script>
+  // Draw the ribbon when it scrolls into view.
+  const io = new IntersectionObserver(
+    (entries) =>
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-inview');
+          io.unobserve(e.target);
+        }
+      }),
+    { threshold: 0.2 },
+  );
+  document.querySelectorAll('.ribbon--animate').forEach((el) => io.observe(el));
+</script>
+
+<style>
+  .ribbon {
+    overflow: visible;
+  }
+
+  .ribbon__dot {
+    fill: var(--yellow);
+    filter: drop-shadow(0 0 18px rgb(255 188 0 / 0.55));
+  }
+
+  .ribbon--animate .ribbon__stroke {
+    stroke-dasharray: 1 1;
+    stroke-dashoffset: 1;
+    animation: ribbon-draw 2.4s cubic-bezier(0.65, 0, 0.35, 1) 0.2s forwards paused;
+  }
+
+  .ribbon--animate.is-inview .ribbon__stroke,
+  .ribbon--animate.is-inview .ribbon__dot {
+    animation-play-state: running;
+  }
+
+  .ribbon--animate .ribbon__dot {
+    transform-box: fill-box;
+    transform-origin: center;
+    transform: scale(0);
+    animation: ribbon-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 1.6s forwards paused;
+  }
+
+  @keyframes ribbon-draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes ribbon-pop {
+    to {
+      transform: scale(1);
+    }
+  }
+</style>

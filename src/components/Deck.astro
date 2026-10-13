@@ -1,0 +1,512 @@
+---
+// Interactive slide deck: text panel + stage (live Discord simulator or a visual).
+// Without JavaScript every slide is shown as a plain list.
+import '../styles/sim.css';
+import type { Deck } from '../lib/deck-types';
+import type { Mission } from '../data/missions';
+import { md } from '../lib/md';
+import { server } from '../data/server';
+import { useTranslations, type Locale } from '../i18n/ui';
+import DeckVisual from './DeckVisual.astro';
+
+interface Props {
+  deck: Deck;
+  mission: Mission;
+  next?: Mission;
+  locale: Locale;
+}
+
+const { deck, mission, next, locale } = Astro.props;
+const t = useTranslations(locale);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const total = deck.slides.length;
+
+const payload = {
+  slug: mission.slug,
+  badge: mission.badge,
+  xp: mission.xp,
+  server,
+  slides: deck.slides.map((s) => ({
+    id: s.id,
+    duration: s.duration ?? 8000,
+    scene: s.visual.kind === 'sim' ? s.visual.scene : null,
+  })),
+  labels: {
+    play: t('deck.play'),
+    pause: t('deck.pause'),
+    tapHere: t('deck.tapHere'),
+    skip: t('deck.skip'),
+    missionDone: t('toast.missionDone'),
+    badge: t('toast.badge'),
+  },
+};
+---
+
+<section class="deck" data-deck aria-roledescription="slide deck" aria-label={mission.title}>
+  <div class="deck__progress" role="tablist" aria-label={t('deck.step')}>
+    {
+      deck.slides.map((s, i) => (
+        <button class="deck__seg" type="button" role="tab" data-seg={i} aria-label={`${t('deck.step')} ${i + 1}: ${s.title}`}>
+          <span class="deck__seg-fill" />
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="deck__grid">
+    <div class="deck__stage glass hud-corners">
+      <div class="deck__toolbar">
+        <div class="seg-toggle" role="group" aria-label="Mode" data-mode-group>
+          <button type="button" data-mode="watch" aria-pressed="true">▶ {t('deck.modeWatch')}</button>
+          <button type="button" data-mode="try" aria-pressed="false">☝ {t('deck.modeTry')}</button>
+        </div>
+        <div class="seg-toggle" role="group" aria-label={t('deck.device')} data-device-group>
+          <button type="button" data-device="mobile" aria-pressed="false" aria-label={t('deck.mobile')}>📱<span class="lbl"> {t('deck.mobile')}</span></button>
+          <button type="button" data-device="desktop" aria-pressed="true" aria-label={t('deck.desktop')}>💻<span class="lbl"> {t('deck.desktop')}</span></button>
+        </div>
+      </div>
+      <div class="deck__screen">
+        {
+          deck.slides.map((s, i) =>
+            s.visual.kind === 'sim' ? (
+              <div class="deck__visual deck__visual--sim" data-visual={i} />
+            ) : (
+              <div class="deck__visual" data-visual={i}>
+                <DeckVisual visual={s.visual} locale={locale} xp={mission.xp} />
+              </div>
+            ),
+          )
+        }
+        <div class="sim" data-sim></div>
+      </div>
+      <div class="deck__caption" data-caption aria-live="polite"></div>
+      <div class="deck__controls">
+        <button class="ctrl" type="button" data-prev aria-label={t('deck.prev')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+        </button>
+        <button class="ctrl ctrl--play" type="button" data-play aria-label={t('deck.pause')}>
+          <svg class="ico-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"></path></svg>
+          <svg class="ico-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8V4Z"></path></svg>
+        </button>
+        <button class="ctrl" type="button" data-replay aria-label={t('deck.replay')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"></path></svg>
+        </button>
+        <button class="ctrl" type="button" data-next aria-label={t('deck.next')}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </button>
+        <span class="deck__counter hud"><b data-counter>1</b> / {total}</span>
+      </div>
+    </div>
+
+    <div class="deck__text">
+      {
+        deck.slides.map((s, i) => (
+          <article class="deck__slide" data-slide={i} aria-label={`${t('deck.step')} ${i + 1}`}>
+            <p class="hud hud--yellow">
+              {t('mission.label')} {String(mission.no).padStart(2, '0')} · {t('deck.step')} {i + 1}/{total}
+            </p>
+            <h2 class="deck__title">{s.title}</h2>
+            <p class="deck__body" set:html={md(s.body)} />
+            {s.bullets && (
+              <ul class="deck__bullets">
+                {s.bullets.map((b) => (
+                  <li set:html={md(b)} />
+                ))}
+              </ul>
+            )}
+            {s.tips?.map((tip) => (
+              <div class="deck__tip">
+                <span class="hud">{tip.label}</span>
+                <p set:html={md(tip.text)} />
+              </div>
+            ))}
+            {i === total - 1 && next && (
+              <a class="deck__next-mission" href={`${base}/misi/${next.slug}/`}>
+                {t('deck.nextMission')}: <b>{next.title}</b> →
+              </a>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </div>
+
+  <script type="application/json" data-deck-json set:html={JSON.stringify(payload).replace(/</g, '\\u003c')} />
+</section>
+
+<script>
+  import { initDeck } from '../scripts/deck';
+
+  document.querySelectorAll<HTMLElement>('[data-deck]').forEach((el) => initDeck(el));
+</script>
+
+<style>
+  .deck {
+    display: grid;
+    gap: 18px;
+  }
+
+  .deck__progress {
+    display: flex;
+    gap: 6px;
+  }
+
+  .deck__seg {
+    flex: 1;
+    height: 18px;
+    padding: 6px 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .deck__seg::before {
+    content: '';
+    display: block;
+    height: 6px;
+    background: rgb(255 255 255 / 0.12);
+    transform: skewX(-20deg);
+  }
+
+  .deck__seg-fill {
+    display: block;
+    height: 6px;
+    margin-top: -6px;
+    width: calc(var(--p, 0) * 100%);
+    background: var(--yellow);
+    box-shadow: 0 0 10px rgb(255 188 0 / 0.6);
+    transform: skewX(-20deg);
+    transition: width 0.25s linear;
+  }
+
+  .deck__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.75fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: stretch;
+  }
+
+  .deck__stage {
+    display: flex;
+    flex-direction: column;
+    height: clamp(560px, calc(100vh - 150px), 760px);
+    padding: 12px;
+    overflow: hidden;
+  }
+
+  .deck__caption {
+    display: grid;
+    place-items: center;
+    min-height: 52px;
+    margin-top: 10px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: rgb(0 0 0 / 0.35);
+    border: 1px solid var(--line);
+    color: var(--text);
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-align: center;
+    line-height: 1.3;
+    transition: border-color 0.2s ease;
+  }
+
+  .deck__caption:empty::before {
+    content: '· · ·';
+    color: var(--text-dim);
+  }
+
+  .deck__caption.is-on {
+    border-color: rgb(255 188 0 / 0.55);
+    animation: caption-in 0.3s ease;
+  }
+
+  @keyframes caption-in {
+    from {
+      opacity: 0.3;
+    }
+  }
+
+  .deck__toolbar {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .seg-toggle {
+    display: inline-flex;
+    padding: 3px;
+    border-radius: 10px;
+    background: rgb(0 0 0 / 0.3);
+    border: 1px solid var(--line);
+  }
+
+  .seg-toggle button {
+    border: 0;
+    border-radius: 7px;
+    padding: 6px 12px;
+    background: none;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-weight: 800;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .seg-toggle button[aria-pressed='true'] {
+    background: var(--blue);
+    color: var(--white);
+    box-shadow: 0 0 16px rgb(0 97 175 / 0.6);
+  }
+
+  .seg-toggle button[data-mode='try'][aria-pressed='true'] {
+    background: var(--yellow);
+    color: var(--navy-950);
+    box-shadow: 0 0 16px rgb(255 188 0 / 0.5);
+  }
+
+  .deck__screen {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .deck__visual {
+    display: flex;
+    padding: 16px;
+  }
+
+  .deck__visual--sim {
+    display: none;
+  }
+
+  .sim {
+    display: none;
+  }
+
+  .deck__text {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .deck__slide {
+    display: grid;
+    gap: 14px;
+    align-content: start;
+  }
+
+  .deck__title {
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+
+  .deck__body {
+    font-size: 1.08rem;
+    color: var(--text);
+  }
+
+  .deck__body :global(strong),
+  .deck__bullets :global(strong) {
+    color: var(--yellow-soft);
+  }
+
+  .deck__bullets {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .deck__bullets li {
+    position: relative;
+    padding-left: 26px;
+  }
+
+  .deck__bullets li::before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 0.55em;
+    width: 10px;
+    height: 10px;
+    background: var(--yellow);
+    transform: rotate(45deg);
+  }
+
+  .deck__tip {
+    padding: 12px 14px;
+    border-left: 3px solid var(--blue-glow);
+    background: rgb(47 140 255 / 0.1);
+    border-radius: 0 10px 10px 0;
+    font-size: 0.95rem;
+  }
+
+  .deck__tip .hud {
+    display: block;
+    margin-bottom: 2px;
+    color: var(--blue-soft);
+  }
+
+  .deck__next-mission {
+    font-weight: 700;
+  }
+
+  .deck__controls {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding-top: 10px;
+  }
+
+  .ctrl {
+    --c: 8px;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 0;
+    background: rgb(255 255 255 / 0.07);
+    box-shadow: inset 0 0 0 1px var(--line-strong);
+    clip-path: polygon(var(--c) 0, 100% 0, 100% calc(100% - var(--c)), calc(100% - var(--c)) 100%, 0 100%, 0 var(--c));
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .ctrl:hover {
+    background: rgb(47 140 255 / 0.25);
+  }
+
+  .ctrl svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ctrl--play {
+    width: 64px;
+    background: var(--yellow);
+    color: var(--navy-950);
+    box-shadow: none;
+  }
+
+  .ctrl--play:hover {
+    background: var(--yellow-soft);
+  }
+
+  .ctrl--play svg {
+    stroke-width: 3;
+  }
+
+  .ctrl--play .ico-play {
+    display: none;
+    fill: currentColor;
+  }
+
+  :global(.deck.is-paused) .ctrl--play .ico-play {
+    display: block;
+  }
+
+  :global(.deck.is-paused) .ctrl--play .ico-pause {
+    display: none;
+  }
+
+  .deck__counter {
+    margin-left: auto;
+  }
+
+  .deck__counter b {
+    color: var(--text);
+    font-size: 1rem;
+  }
+
+  /* ---- enhanced (JS) state: one slide at a time ---- */
+  :global(.deck.is-ready) .deck__slide,
+  :global(.deck.is-ready) .deck__visual {
+    display: none;
+  }
+
+  :global(.deck.is-ready) .deck__slide.is-active {
+    display: grid;
+    animation: slide-in 0.4s ease;
+  }
+
+  :global(.deck.is-ready) .deck__visual.is-active:not(.deck__visual--sim) {
+    display: flex;
+    position: absolute;
+    inset: 0;
+    overflow: auto;
+  }
+
+  :global(.deck.is-ready.is-sim) .sim {
+    display: block;
+    position: absolute;
+    inset: 0;
+  }
+
+  :global(.deck.is-ready) .deck__controls {
+    display: flex;
+  }
+
+  :global(.deck:not(.is-ready)) .deck__stage {
+    height: auto;
+  }
+
+  :global(.deck:not(.is-sim)) [data-device-group],
+  :global(.deck:not(.is-sim)) [data-mode-group] {
+    visibility: hidden;
+  }
+
+  :global(.deck:not(.is-ready)) .deck__toolbar,
+  :global(.deck:not(.is-ready)) .deck__caption,
+  :global(.deck:not(.is-ready)) .deck__progress {
+    display: none;
+  }
+
+  :global(.deck:not(.is-ready)) .deck__grid {
+    grid-template-columns: 1fr;
+  }
+
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  @media (max-width: 900px) {
+    .deck__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .deck__stage {
+      height: min(88vh, 760px);
+      padding: 8px;
+    }
+
+    .deck__caption {
+      font-size: 0.95rem;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .seg-toggle .lbl {
+      display: none;
+    }
+
+    .seg-toggle button {
+      padding: 6px 10px;
+    }
+  }
+</style>

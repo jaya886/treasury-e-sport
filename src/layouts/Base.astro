@@ -1,0 +1,90 @@
+---
+import '@fontsource-variable/figtree';
+import '@fontsource-variable/figtree/wght-italic.css';
+import '@fontsource-variable/jetbrains-mono';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Toast from '../components/Toast.astro';
+import { useTranslations, defaultLocale, type Locale } from '../i18n/ui';
+
+interface Props {
+  title?: string;
+  description?: string;
+  locale?: Locale;
+}
+
+const { title, description, locale = defaultLocale } = Astro.props;
+const t = useTranslations(locale);
+const pageTitle = title ? `${title} · ${t('site.name')}` : `${t('site.name')} — ${t('site.tagline')}`;
+const desc = description ?? t('site.description');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={desc} />
+    <meta name="theme-color" content="#070823" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={desc} />
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+  </head>
+  <body>
+    <div class="arena-bg" aria-hidden="true"></div>
+    <a class="skip-link" href="#main">Lewati ke konten</a>
+    <Header locale={locale} />
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap site-footer__inner">
+        <p>
+          {t('footer.help')} <code>#❓support-dan-usulan</code>
+        </p>
+        <p class="site-footer__note">{t('footer.note')}</p>
+        <p class="hud">{t('site.community')} · {t('site.name')}</p>
+      </div>
+    </footer>
+    <Toast />
+  </body>
+</html>
+
+<style>
+  .skip-link {
+    position: absolute;
+    left: 16px;
+    top: -60px;
+    z-index: 200;
+    padding: 10px 16px;
+    background: var(--yellow);
+    color: var(--navy-950);
+    font-weight: 800;
+  }
+
+  .skip-link:focus {
+    top: 12px;
+  }
+
+  .site-footer {
+    margin-top: 96px;
+    border-top: 1px solid var(--line);
+    background: rgb(7 8 35 / 0.6);
+  }
+
+  .site-footer__inner {
+    display: grid;
+    gap: 10px;
+    padding-block: 36px 48px;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .site-footer__note {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    max-width: 70ch;
+  }
+</style>

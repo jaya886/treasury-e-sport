@@ -1,6 +1,6 @@
 # TEC Discord Guide — Project Plan
 
-> Status: **Draft v2** — planning phase. Items marked **[OPEN]** need a decision before they are built.
+> Status: **v3** — prototype built (homepage + Misi 05 Lapor Hasil). Items marked **[OPEN]** need a decision before they are built.
 
 ## 1. Purpose
 
@@ -41,7 +41,7 @@ on-ramp: get Treasury employees into Discord and comfortable there.
 | Magic Chess: Go Go | Online, solo | `#magic-chess-go-go` | |
 | Dota 2 | Online, team | `#dota2` | Match ID available in-game |
 | FC 27 | **Offline** | — | Played offline; Discord reporting not expected. Guide covers announcements/support only |
-| Chess (lichess.org) | Online, solo | `#literally-catur` | **[OPEN]** Individual games (game URL = proof) vs lichess Swiss tournament (auto results) — decide with chess PIC |
+| Chess (lichess.org) | Online, solo | `#literally-catur` | Individual lichess games; the **game link is the Match ID** + screenshot of the final board. (Swiss tournament remains an option for the chess PIC.) |
 
 ## 2. Current Discord server (as of screenshots)
 
@@ -187,7 +187,7 @@ Kemenkeu logos — pushed toward a game-like, Astro-style "stipple gradient + fr
   yellow dots become checkpoints / the player token. Strokes "draw" in on scroll.
 - **Stipple gradient**: blue/yellow radial glows on navy with a dithered grain overlay.
 - **Frosted glass**: translucent panels with backdrop blur and a thin light border.
-- **Game touches** (level **[OPEN]**): mission numbers, XP bar, achievement toast, optional final quiz.
+- **Game touches** (agreed: *medium*): gamer look (dark arena, chamfered buttons, HUD labels, neon glow), mission numbers, XP bar + ranks, achievement toast with badge per mission. No final quiz.
 - **Accessibility**: yellow never used as text on white; AA contrast; full keyboard support.
 - Wordmark: type-only "TEC" mark (no official logos).
 
@@ -197,16 +197,16 @@ Kemenkeu logos — pushed toward a game-like, Astro-style "stipple gradient + fr
 |---|---|---|
 | Framework | **Astro** (static output) | Fast, content-first, islands for interactivity |
 | Content | MDX content collections | Easy to edit; components inside prose |
-| Interactivity | Preact islands (simulator, channel map, progress) | Small runtime |
+| Interactivity | Vanilla TypeScript islands (simulator, deck player, progress) | No UI framework runtime; fewer dependencies |
 | i18n | Astro i18n routing, `id` default (no prefix), UI strings in `src/i18n/` | English can be added later without restructuring |
 | Styling | Plain CSS with design tokens (custom properties) | Full control of the custom look |
 | Hosting | GitHub Pages via GitHub Actions | Free; `https://jaya886.github.io/treasury-e-sport/` |
 
 ## 8. Milestones
 
-1. **Plan & server structure agreed** ← we are here
-2. Scaffold + design system + homepage (visual direction review)
-3. Simulator engine + **Lapor Hasil** scene (most important flow — review early)
+1. ✅ Plan & server structure agreed
+2. ✅ Scaffold + design system + homepage
+3. ✅ Simulator engine + **Lapor Hasil** deck ← review this
 4. Remaining missions + channel map
 5. Per-game cheat sheets (needs real in-game screenshots)
 6. Mobile QA, accessibility pass, deploy
@@ -215,8 +215,6 @@ Kemenkeu logos — pushed toward a game-like, Astro-style "stipple gradient + fr
 
 | # | Decision | Owner | Blocks |
 |---|---|---|---|
-| 1 | Chess: individual lichess games vs lichess Swiss tournament | Chess PIC | Chess cheat sheet |
 | 2 | PUBGM reporting flow | PUBGM PIC | PUBGM cheat sheet |
 | 3 | WO consequences & reschedule rules | Panitia | Misi 6 text |
-| 4 | How much game-style UI (see chat) | Owner | Design detail only |
 | 5 | Competition format & dates | Panitia | Example dates in scenes only |

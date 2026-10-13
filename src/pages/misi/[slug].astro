@@ -1,0 +1,121 @@
+---
+import Base from '../../layouts/Base.astro';
+import Deck from '../../components/Deck.astro';
+import { missions } from '../../data/missions';
+import { decks } from '../../decks/id';
+import { useTranslations, defaultLocale } from '../../i18n/ui';
+
+export function getStaticPaths() {
+  return missions[defaultLocale].map((m) => ({ params: { slug: m.slug } }));
+}
+
+const locale = defaultLocale;
+const t = useTranslations(locale);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const list = missions[locale];
+const { slug } = Astro.params;
+const idx = list.findIndex((m) => m.slug === slug);
+const mission = list[idx];
+const next = list.slice(idx + 1).find((m) => m.ready);
+const deck = mission.ready ? decks[mission.slug] : undefined;
+---
+
+<Base locale={locale} title={mission.title} description={mission.blurb}>
+  <div class="wrap mission">
+    <nav class="mission__crumb">
+      <a href={`${base}/#peta-misi`}>← {t('mission.back')}</a>
+    </nav>
+
+    <header class="mission__head">
+      <span class="mission__no display" aria-hidden="true">{String(mission.no).padStart(2, '0')}</span>
+      <div>
+        <p class="hud hud--yellow">
+          {t('mission.label')} {String(mission.no).padStart(2, '0')} · {mission.minutes} {t('mission.minutes')} · +{mission.xp} XP
+        </p>
+        <h1 class="mission__title display">{mission.title}</h1>
+        <p class="mission__blurb">{mission.blurb}</p>
+      </div>
+    </header>
+
+    {
+      deck ? (
+        <Deck deck={deck} mission={mission} next={next} locale={locale} />
+      ) : (
+        <section class="soon glass hud-corners">
+          <p class="hud hud--yellow">{t('mission.soon')}</p>
+          <h2 class="display">{t('mission.soonTitle')}</h2>
+          <p>{t('mission.soonBody')}</p>
+          <div class="soon__cta">
+            {list
+              .filter((m) => m.ready)
+              .map((m) => (
+                <a class="btn btn--primary" href={`${base}/misi/${m.slug}/`}>
+                  ▶ {t('mission.label')} {String(m.no).padStart(2, '0')}: {m.title}
+                </a>
+              ))}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Base>
+
+<style>
+  .mission {
+    display: grid;
+    gap: 18px;
+    padding-top: 20px;
+  }
+
+  .mission__crumb a {
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .mission__crumb a:hover {
+    color: var(--yellow);
+  }
+
+  .mission__head {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .mission__no {
+    font-size: clamp(3rem, 7vw, 5rem);
+    color: transparent;
+    -webkit-text-stroke: 2px var(--blue-glow);
+    text-shadow: 0 0 40px rgb(47 140 255 / 0.35);
+  }
+
+  .mission__title {
+    font-size: clamp(2rem, 4.5vw, 3rem);
+    margin: 4px 0;
+  }
+
+  .mission__blurb {
+    color: var(--text-muted);
+  }
+
+  .soon {
+    display: grid;
+    gap: 14px;
+    padding: clamp(24px, 5vw, 48px);
+    justify-items: start;
+  }
+
+  .soon h2 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+  }
+
+  .soon p {
+    color: var(--text-muted);
+  }
+
+  .soon__cta {
+    margin-top: 8px;
+  }
+</style>

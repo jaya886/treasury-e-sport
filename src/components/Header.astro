@@ -1,0 +1,188 @@
+---
+import { useTranslations, ranks, type Locale } from '../i18n/ui';
+import { missions } from '../data/missions';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = useTranslations(locale);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const maxXp = missions[locale].reduce((n, m) => n + m.xp, 0);
+---
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href={`${base}/`} aria-label={`${t('site.name')} — ${t('nav.home')}`}>
+      <span class="brand__mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" stroke-width="3"></circle>
+          <circle cx="20" cy="20" r="11" fill="none" stroke="currentColor" stroke-width="3"></circle>
+          <circle cx="20" cy="20" r="4.5" fill="var(--yellow)"></circle>
+        </svg>
+      </span>
+      <span class="brand__text">
+        <span class="brand__name display">TEC <span class="glow-yellow">2026</span></span>
+        <span class="brand__sub hud">{t('site.community')}</span>
+      </span>
+    </a>
+
+    <nav class="site-nav" aria-label="Utama">
+      <a href={`${base}/#peta-misi`}>{t('nav.missions')}</a>
+    </nav>
+
+    <div
+      class="xp"
+      data-xp
+      data-max={maxXp}
+      data-ranks={JSON.stringify(ranks[locale])}
+      title={`${t('xp.label')} — ${t('xp.rank')}`}
+    >
+      <div class="xp__row">
+        <span class="hud hud--yellow" data-xp-rank>{ranks[locale][0].name}</span>
+        <span class="hud"><span data-xp-value>0</span> {t('xp.label')}</span>
+      </div>
+      <div class="xp__bar" role="progressbar" aria-valuemin="0" aria-valuemax={maxXp} aria-valuenow="0" data-xp-bar>
+        <span class="xp__fill" data-xp-fill></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  import { readProgress, xpOf } from '../scripts/progress';
+
+  function render() {
+    const el = document.querySelector<HTMLElement>('[data-xp]');
+    if (!el) return;
+    const max = Number(el.dataset.max) || 1;
+    const ranks: { min: number; name: string }[] = JSON.parse(el.dataset.ranks || '[]');
+    const xp = xpOf(readProgress());
+    const rank = [...ranks].reverse().find((r) => xp >= r.min);
+    el.querySelector('[data-xp-value]')!.textContent = String(xp);
+    if (rank) el.querySelector('[data-xp-rank]')!.textContent = rank.name;
+    el.querySelector<HTMLElement>('[data-xp-fill]')!.style.width = `${Math.min(100, (xp / max) * 100)}%`;
+    el.querySelector('[data-xp-bar]')!.setAttribute('aria-valuenow', String(xp));
+  }
+
+  render();
+  document.addEventListener('tec:progress', render);
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: linear-gradient(180deg, rgb(7 8 35 / 0.85), rgb(7 8 35 / 0.55));
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 68px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .brand:hover {
+    color: var(--text);
+  }
+
+  .brand__mark {
+    width: 36px;
+    height: 36px;
+    color: var(--blue-glow);
+    flex: none;
+  }
+
+  .brand__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .brand__name {
+    font-size: 1.35rem;
+  }
+
+  .brand__sub {
+    font-size: 0.6rem;
+  }
+
+  .site-nav {
+    margin-left: auto;
+    display: flex;
+    gap: 20px;
+  }
+
+  .site-nav a {
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+
+  .site-nav a:hover {
+    color: var(--yellow);
+  }
+
+  .xp {
+    width: 180px;
+    flex: none;
+  }
+
+  .xp__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+
+  .xp__row .hud {
+    font-size: 0.65rem;
+  }
+
+  .xp__bar {
+    height: 8px;
+    background: rgb(255 255 255 / 0.08);
+    border: 1px solid var(--line);
+    transform: skewX(-20deg);
+    overflow: hidden;
+  }
+
+  .xp__fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: repeating-linear-gradient(90deg, var(--yellow) 0 6px, var(--yellow-soft) 6px 8px);
+    box-shadow: 0 0 12px rgb(255 188 0 / 0.6);
+    transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @media (max-width: 640px) {
+    .site-nav {
+      display: none;
+    }
+
+    .brand__sub {
+      display: none;
+    }
+
+    .xp {
+      width: 120px;
+      margin-left: auto;
+    }
+  }
+</style>

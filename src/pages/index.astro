@@ -1,0 +1,338 @@
+---
+import Base from '../layouts/Base.astro';
+import Ribbon from '../components/Ribbon.astro';
+import MissionMap from '../components/MissionMap.astro';
+import { meander } from '../lib/ribbon';
+import { missions, games } from '../data/missions';
+import { useTranslations, defaultLocale } from '../i18n/ui';
+
+const locale = defaultLocale;
+const t = useTranslations(locale);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const list = missions[locale];
+const featured = list.find((m) => m.ready)!;
+
+// Hero supergraphic: arches rising from below, like the HORI 80 cover.
+const hero = meander({ x: 60, baseline: 760, r: 62, apexY: [250, 800, 70, 800, 330, 800, 160] });
+const heroDots = [
+  { x: 184, y: 520 },
+  { x: 432, y: 300, front: true },
+  { x: 804, y: 580 },
+];
+
+const why = [
+  {
+    icon: '🏠',
+    title: 'Satu rumah komunitas',
+    text: 'Server Discord ini akan jadi rumah Treasury E-Sport Community setelah kompetisi selesai.',
+  },
+  {
+    icon: '👀',
+    title: 'Transparan',
+    text: 'Setiap laga punya thread publik: jadwal, obrolan, dan hasilnya bisa dilihat semua orang.',
+  },
+  {
+    icon: '⏰',
+    title: 'Jam otomatis sesuai zonamu',
+    text: 'Jadwal di Discord tampil sesuai jam di perangkatmu, baik WIB, WITA, maupun WIT.',
+  },
+];
+---
+
+<Base locale={locale}>
+  <section class="hero">
+    <div class="wrap hero__inner">
+      <div class="hero__copy">
+        <p class="hud hud--yellow">// {t('site.community')}</p>
+        <h1 class="hero__title display">
+          Siap<br />tanding di<br /><span class="glow-yellow">Discord</span>
+        </h1>
+        <p class="hero__lead">
+          Panduan interaktif untuk peserta <b>TEC 2026</b>: cari jadwal laga, atur waktu main dengan lawan, dan lapor hasil, semuanya lewat Discord.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href={`${base}/misi/${featured.slug}/`}>▶ Coba Misi: {featured.title}</a>
+          <a class="btn btn--ghost" href="#peta-misi">{t('nav.missions')}</a>
+        </div>
+        <ul class="hero__stats" aria-label="Ringkasan">
+          <li><b>{list.length}</b><span class="hud">Misi</span></li>
+          <li><b>{games.length}</b><span class="hud">Game</span></li>
+          <li><b>{list.reduce((n, m) => n + m.xp, 0)}</b><span class="hud">XP</span></li>
+        </ul>
+      </div>
+
+      <div class="hero__art" aria-hidden="true">
+        <Ribbon d={hero.d} viewBox="0 0 980 720" unit={7} dots={heroDots} from="#59a8ff" to="var(--blue)" />
+        <div class="float float--a glass"><span class="float__badge">1</span> Kamu disebut di <b>[MLBB] R1</b></div>
+        <div class="float float--b glass">🟢 <b>Selesai</b> · 2 - 1</div>
+        <div class="float float--c glass"><span class="glow-yellow">★ +100 XP</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section wrap" aria-labelledby="kenapa">
+    <p class="hud hud--yellow">// Kenapa Discord?</p>
+    <h2 id="kenapa" class="section__title display">Satu tempat untuk semua urusan laga</h2>
+    <div class="why">
+      {
+        why.map((w) => (
+          <article class="why__card glass hud-corners">
+            <span class="why__icon">{w.icon}</span>
+            <h3>{w.title}</h3>
+            <p>{w.text}</p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section wrap" id="peta-misi" aria-labelledby="peta-misi-title">
+    <p class="hud hud--yellow">// {t('nav.missions')}</p>
+    <h2 id="peta-misi-title" class="section__title display">Selesaikan misinya, kumpulkan XP</h2>
+    <p class="section__lead">
+      Setiap misi berisi tayangan interaktif. Tonton seperti video, atau pilih <b>Coba Sendiri</b> untuk mempraktikkannya langsung di
+      tampilan Discord.
+    </p>
+    <MissionMap missions={list} locale={locale} />
+  </section>
+
+  <section class="section wrap" aria-labelledby="game">
+    <p class="hud hud--yellow">// Game yang dipertandingkan</p>
+    <h2 id="game" class="section__title display">6 game, satu cara lapor</h2>
+    <ul class="games">
+      {
+        games.map((g) => (
+          <li class="games__item glass">
+            <b class="games__name">{g.name}</b>
+            <span class="games__full">{g.full}</span>
+            <span class="chip">{g.report}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(40px, 7vw, 90px) 40px;
+  }
+
+  .hero__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: 24px;
+  }
+
+  .hero__copy {
+    display: grid;
+    gap: 22px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero__title {
+    font-size: clamp(3rem, 7.5vw, 6.2rem);
+  }
+
+  .hero__lead {
+    max-width: 46ch;
+    font-size: 1.15rem;
+    color: var(--text-muted);
+  }
+
+  .hero__lead b {
+    color: var(--text);
+  }
+
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .hero__stats {
+    display: flex;
+    gap: 28px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .hero__stats li {
+    display: grid;
+  }
+
+  .hero__stats b {
+    font-size: 2rem;
+    font-weight: 900;
+    font-style: italic;
+    line-height: 1;
+  }
+
+  .hero__art {
+    position: relative;
+    aspect-ratio: 980 / 720;
+  }
+
+  .hero__art :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .float {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .float--a {
+    left: 2%;
+    top: 12%;
+  }
+
+  .float--b {
+    right: 4%;
+    top: 4%;
+    animation-delay: -2s;
+  }
+
+  .float--c {
+    right: 10%;
+    bottom: 22%;
+    font-weight: 900;
+    font-style: italic;
+    animation-delay: -4s;
+  }
+
+  .float__badge {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #f23f43;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  @keyframes float {
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .section {
+    padding-top: clamp(56px, 8vw, 110px);
+    display: grid;
+    gap: 16px;
+  }
+
+  .section__title {
+    font-size: clamp(2rem, 4.5vw, 3.4rem);
+    max-width: 18ch;
+  }
+
+  .section__lead {
+    max-width: 62ch;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .section__lead b {
+    color: var(--yellow);
+  }
+
+  .why {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 16px;
+  }
+
+  .why__card {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    padding: 24px;
+  }
+
+  .why__icon {
+    font-size: 2rem;
+  }
+
+  .why__card h3 {
+    font-size: 1.25rem;
+    font-weight: 900;
+  }
+
+  .why__card p {
+    color: var(--text-muted);
+  }
+
+  .games {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 16px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .games__item {
+    display: grid;
+    gap: 4px;
+    justify-items: start;
+    padding: 18px 20px;
+  }
+
+  .games__name {
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+  }
+
+  .games__full {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 900px) {
+    .hero__inner {
+      grid-template-columns: 1fr;
+    }
+
+    .hero__art {
+      margin-top: -10px;
+    }
+
+    .why {
+      grid-template-columns: 1fr;
+    }
+
+    .games {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 480px) {
+    .games {
+      grid-template-columns: 1fr;
+    }
+
+    .float {
+      font-size: 0.75rem;
+    }
+  }
+</style>

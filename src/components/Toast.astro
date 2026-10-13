@@ -1,0 +1,118 @@
+---
+// Achievement toast. Listens for `tec:toast` events (see scripts/progress.ts).
+---
+
+<div class="toast-host" aria-live="polite" data-toast-host></div>
+
+<script>
+  import type { ToastDetail } from '../scripts/progress';
+
+  const host = document.querySelector<HTMLElement>('[data-toast-host]');
+
+  document.addEventListener('tec:toast', (e) => {
+    if (!host) return;
+    const { title, body, badge } = (e as CustomEvent<ToastDetail>).detail;
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.innerHTML = `
+      <div class="toast__medal" aria-hidden="true"><span>★</span></div>
+      <div class="toast__text">
+        <div class="toast__title"></div>
+        <div class="toast__body"></div>
+        ${badge ? '<div class="toast__badge"></div>' : ''}
+      </div>`;
+    el.querySelector('.toast__title')!.textContent = title;
+    el.querySelector('.toast__body')!.textContent = body;
+    if (badge) el.querySelector('.toast__badge')!.textContent = badge;
+    host.appendChild(el);
+    setTimeout(() => el.classList.add('is-leaving'), 5200);
+    setTimeout(() => el.remove(), 5800);
+  });
+</script>
+
+<style is:global>
+  .toast-host {
+    position: fixed;
+    z-index: 100;
+    left: 50%;
+    top: 84px;
+    transform: translateX(-50%);
+    display: grid;
+    gap: 10px;
+    width: min(420px, calc(100vw - 32px));
+    pointer-events: none;
+  }
+
+  .toast {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 18px;
+    background: linear-gradient(120deg, rgb(255 188 0 / 0.22), rgb(13 15 51 / 0.92) 45%);
+    border: 1px solid rgb(255 188 0 / 0.6);
+    border-radius: 14px;
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    box-shadow: 0 0 40px rgb(255 188 0 / 0.25), 0 20px 50px -20px #000;
+    animation: toast-in 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .toast.is-leaving {
+    animation: toast-out 0.5s ease forwards;
+  }
+
+  .toast__medal {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3c4, var(--yellow) 55%, #c98f00);
+    color: var(--navy-950);
+    font-size: 1.4rem;
+    box-shadow: 0 0 24px rgb(255 188 0 / 0.6);
+    animation: medal-spin 1.2s ease-out;
+  }
+
+  .toast__title {
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    color: var(--yellow);
+    letter-spacing: 0.02em;
+  }
+
+  .toast__body {
+    font-size: 0.9rem;
+    color: var(--text);
+  }
+
+  .toast__badge {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.9);
+    }
+  }
+
+  @keyframes toast-out {
+    to {
+      opacity: 0;
+      transform: translateY(-12px);
+    }
+  }
+
+  @keyframes medal-spin {
+    from {
+      transform: rotateY(540deg) scale(0.4);
+    }
+  }
+</style>
