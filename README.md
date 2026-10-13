@@ -42,8 +42,16 @@ a `setup` (what the Discord screen shows first) and `steps`, for example:
 { tags: { post: 'r1', tags: ['MLBB', 'Selesai'] } },
 ```
 
-Targets (`plus`, `send`, `composer`, `thread:<id>`, `ch:<id>`, `pick:result`, `upload`, `starter`) are the
-`data-t` attributes rendered by the simulator.
+Views: `home`, `channel` (with `channel: '<id>'`), `forum`, `thread`, `invite`, `nickname`.
+
+Targets are the `data-t` attributes rendered by the simulator, e.g. `plus`, `send`, `composer`, `starter`,
+`thread:<id>`, `post:<id>`, `ch:<id>`, `cat:<name>`, `filter:<tag>`, `search`, `follow`, `accept`,
+`server-menu`, `edit-profile`, `nick`, `save`, `rail:tec`, `me`, `tab:<name>`, `pick:result`, `upload`.
+A missing target logs `[sim] target not found` in the browser console.
+
+Non-Discord slides use `visual.kind`: `flow`, `shot`, `zones`, `cards`, `concept`, `form`, `note`, `recap`.
+
+Tip: add `?speed=4` to a mission URL to review its scenes faster.
 
 ### Adding a language
 

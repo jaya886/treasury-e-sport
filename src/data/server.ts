@@ -1,20 +1,33 @@
 // Mock of the real Treasury E-Sport Community server, used by the Discord simulator.
 // Keep channel names in sync with the real server; people, teams and IDs are fictional.
-import type { SimServer } from '../lib/sim-types';
+import type { SimPost, SimServer } from '../lib/sim-types';
+
+const pic = 'sari';
+
+const otherPost = (id: string, title: string, tags: string[], replies: number): SimPost => ({
+  id,
+  title,
+  tags,
+  author: pic,
+  time: 'Kemarin 09.00',
+  text: '',
+  replies: Array.from({ length: replies }, (_, i) => ({ id: `${id}-${i}`, author: 'raka', text: '' })),
+});
 
 export const server: SimServer = {
   name: 'Treasury E-Sport Community',
   me: 'budi',
   forum: 'tec-competition',
+  stats: { online: 48, members: 212 },
   categories: [
     {
       name: 'Informasi',
       emoji: '📣',
       channels: [
-        { id: 'rules', name: 'rules', emoji: '📝', kind: 'rules' },
-        { id: 'pengumuman', name: 'pengumuman', emoji: '📣', kind: 'announce' },
-        { id: 'tec-competition', name: 'tec-competition', emoji: '🏅', kind: 'forum' },
-        { id: 'support-dan-usulan', name: 'support-dan-usulan', emoji: '❓', kind: 'text' },
+        { id: 'rules', name: 'rules', emoji: '📝', kind: 'rules', topic: 'Peraturan server' },
+        { id: 'pengumuman', name: 'pengumuman', emoji: '📣', kind: 'announce', topic: 'Info resmi panitia' },
+        { id: 'tec-competition', name: 'tec-competition', emoji: '🏅', kind: 'forum', topic: 'Thread semua laga TEC 2026' },
+        { id: 'support-dan-usulan', name: 'support-dan-usulan', emoji: '❓', kind: 'text', topic: 'Tanya panitia di sini' },
       ],
     },
     {
@@ -43,19 +56,51 @@ export const server: SimServer = {
     raka: { id: 'raka', name: 'Raka | KPPN Ambon', color: '#e8590c' },
     sari: { id: 'sari', name: 'Sari | PIC', color: '#ffbc00', role: 'PIC', roleColor: '#ffbc00', online: true },
     admin: { id: 'admin', name: 'Admin TEC', color: '#9b5de5', role: 'Admin', roleColor: '#f0b232', online: true },
+    dewi: { id: 'dewi', name: 'Dewi | Kanwil DJPb Sulsel', color: '#3ddc97', online: true },
   },
   tags: {
     MLBB: { emoji: '🎮', tone: 'neutral' },
+    'Dota 2': { emoji: '🎮', tone: 'neutral' },
+    Catur: { emoji: '♟️', tone: 'neutral' },
+    MCGG: { emoji: '🎮', tone: 'neutral' },
     Terjadwal: { emoji: '🔵', tone: 'blue' },
     'Menunggu Laporan': { emoji: '🟡', tone: 'yellow' },
     Selesai: { emoji: '🟢', tone: 'green' },
     Sengketa: { emoji: '🔴', tone: 'red' },
     WO: { emoji: '⚪', tone: 'grey' },
   },
-  announcement: {
-    id: 'ann-1',
-    author: 'admin',
-    time: 'Hari ini 08.00',
-    text: '**Ronde 1 TEC 2026 dimulai!** 🎉\nThread laga setiap tim sudah dibuat di <#tec-competition>. Cek thread kalian, sepakati jam main, dan jangan lupa lapor hasil sebelum batas waktu.',
+  channels: {
+    pengumuman: [
+      {
+        id: 'ann-1',
+        author: 'admin',
+        time: 'Hari ini 08.00',
+        text: '**Ronde 1 TEC 2026 dimulai!** 🎉\nThread laga setiap tim sudah dibuat di <#tec-competition>. Cek thread kalian, sepakati jam main, dan jangan lupa lapor hasil sebelum batas waktu.',
+      },
+    ],
+    rules: [
+      {
+        id: 'rule-1',
+        author: 'admin',
+        time: '01/10/2026',
+        text: '**📝 Peraturan Server**\n1. Saling menghormati. Tidak ada SARA, hinaan, atau spam.\n2. Gunakan nama panggilan `Nama | Satker`.\n3. Urusan laga dibahas di thread laga masing-masing di <#tec-competition>.\n4. Pertanyaan ke panitia lewat <#support-dan-usulan>.\n5. Keputusan PIC dan panitia bersifat final.',
+      },
+    ],
+    'support-dan-usulan': [
+      {
+        id: 'sup-1',
+        author: 'dewi',
+        time: 'Kemarin 14.02',
+        text: 'Halo panitia, untuk catur apakah boleh main di aplikasi lichess HP? 🙏',
+      },
+      { id: 'sup-2', author: 'admin', time: 'Kemarin 14.10', text: 'Boleh, <@dewi>. Pastikan akunnya sesuai yang didaftarkan ya.' },
+    ],
   },
+  forumPosts: [
+    otherPost('f-2', '[MLBB] R1 · Garuda Perben vs Rajawali Papua', ['MLBB', 'Selesai'], 6),
+    otherPost('f-3', '[Dota 2] R1 · Ancient Defenders vs KPPN Five', ['Dota 2', 'Terjadwal'], 3),
+    otherPost('f-4', '[Catur] R1 · Dewi vs Andi', ['Catur', 'Menunggu Laporan'], 4),
+    otherPost('f-5', '[MCGG] R1 · Hendra vs Yusuf', ['MCGG', 'Terjadwal'], 1),
+    otherPost('f-6', '[MLBB] R1 · Anoa Squad vs Cendrawasih', ['MLBB', 'Terjadwal'], 2),
+  ],
 };

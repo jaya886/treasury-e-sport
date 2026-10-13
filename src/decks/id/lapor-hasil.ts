@@ -1,53 +1,5 @@
 import type { Deck } from '../../lib/deck-types';
-import type { SimMessage, SimPost, SimSetup } from '../../lib/sim-types';
-
-// ---------------------------------------------------------------------------
-// Shared scene fixtures
-// ---------------------------------------------------------------------------
-
-const REPORT = `**HASIL LAGA**
-Tim: Elang Sulsel
-Skor: 2 - 1 (menang)
-Match ID: 7491263508`;
-
-const myReport: SimMessage = {
-  id: 'rep-1',
-  author: 'budi',
-  time: 'Hari ini 20.14',
-  text: REPORT,
-  attachment: 'result',
-};
-
-function post(overrides: Partial<SimPost> = {}): SimPost {
-  return {
-    id: 'r1',
-    title: '[MLBB] R1 · Elang Sulsel vs Laskar Maluku',
-    tags: ['MLBB', 'Menunggu Laporan'],
-    author: 'sari',
-    time: 'Kemarin 09.00',
-    text: [
-      'Peserta: <@budi> (Elang Sulsel) vs <@raka> (Laskar Maluku)',
-      'Jendela main: [ts:Sabtu, 14 November 2026 19.00] s/d [ts:21.00]',
-      'Format: Bo3',
-      'Batas lapor: [ts:dalam 2 jam]',
-    ].join('\n'),
-    mention: false,
-    replies: [
-      { id: 'c-1', author: 'raka', time: 'Kemarin 10.12', text: 'Halo! Kita main jam 19.30 ya? 👍' },
-      { id: 'c-2', author: 'budi', time: 'Kemarin 10.20', text: 'Siap, sampai ketemu di lobby!' },
-    ],
-    ...overrides,
-  };
-}
-
-const inThread = (p: SimPost = post(), extra: Partial<SimSetup> = {}): SimSetup => ({
-  view: 'thread',
-  post: p.id,
-  posts: [p],
-  ...extra,
-});
-
-const withReport = () => post({ replies: [...post().replies, myReport] });
+import { REPORT, inThread, post, withReport } from './fixtures';
 
 // ---------------------------------------------------------------------------
 
@@ -252,8 +204,10 @@ export const laporHasil: Deck = {
         'Jika hasil tidak bisa diperiksa, **kedua pihak dianggap WO**.',
       ],
       visual: {
-        kind: 'deadline',
+        kind: 'zones',
         label: 'Batas lapor',
+        chip: 'dalam 2 jam',
+        note: 'Satu batas waktu, tampil sesuai jam di perangkatmu.',
         zones: [
           { zone: 'WIB', time: '21.00' },
           { zone: 'WITA', time: '22.00' },

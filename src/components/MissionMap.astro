@@ -37,7 +37,7 @@ const d =
         const apex = m.apexes[i];
         return (
           <li
-            class:list={['map__item', apex.up ? 'is-top' : 'is-bottom', { 'is-soon': !mi.ready }]}
+            class:list={['map__item', apex.up ? 'is-top' : 'is-bottom', { 'is-soon': !mi.ready, 'is-key': mi.key }]}
             style={`--x:${(apex.x / W) * 100}%;--y:${(apex.y / H) * 100}%`}
             data-slug={mi.slug}
           >
@@ -47,6 +47,7 @@ const d =
             <a class="map__card glass" href={`${base}/misi/${mi.slug}/`}>
               <span class="map__meta hud">
                 {t('mission.label')} {String(mi.no).padStart(2, '0')} · {mi.minutes} {t('mission.minutes')}
+                {mi.key && <span class="map__key">★ Penting</span>}
               </span>
               <span class="map__title">{mi.title}</span>
               <span class="map__blurb">{mi.blurb}</span>
@@ -179,6 +180,29 @@ const d =
     color: var(--text);
     border-color: var(--yellow);
     transform: translateX(-50%) translateY(-3px);
+  }
+
+  .map__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .map__key {
+    margin-left: auto;
+    padding: 1px 6px;
+    border-radius: 4px;
+    background: var(--yellow);
+    color: var(--navy-950);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .is-key .map__card {
+    border-color: rgb(255 188 0 / 0.55);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.08),
+      0 0 30px -6px rgb(255 188 0 / 0.35);
   }
 
   .map__title {

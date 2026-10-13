@@ -35,8 +35,10 @@ export interface SimPost {
   author: string;
   text: string;
   time: string;
-  /** red @ badge in the sidebar */
+  /** red @ badge in the sidebar / forum list */
   mention?: boolean;
+  /** false → "me" has not joined it yet, so it is not listed in the sidebar */
+  joined?: boolean;
   replies: SimMessage[];
 }
 
@@ -49,6 +51,7 @@ export interface SimChannel {
   kind: ChannelKind;
   locked?: boolean;
   unread?: boolean;
+  topic?: string;
 }
 
 export interface SimCategory {
@@ -64,16 +67,32 @@ export interface SimServer {
   categories: SimCategory[];
   users: Record<string, SimUser>;
   tags: Record<string, { emoji: string; tone: 'neutral' | 'blue' | 'yellow' | 'green' | 'red' | 'grey' }>;
-  announcement: SimMessage;
+  /** default messages per text channel */
+  channels: Record<string, SimMessage[]>;
+  /** other match posts visible in the forum list (not joined by "me") */
+  forumPosts: SimPost[];
+  stats: { online: number; members: number };
 }
 
+export type SimView = 'home' | 'thread' | 'forum' | 'channel' | 'invite' | 'nickname';
+
 export interface SimSetup {
-  view: 'home' | 'thread';
+  view: SimView;
   /** id of the open (or featured) post */
   post: string;
+  /** posts "me" has joined — listed in the sidebar */
   posts: SimPost[];
+  /** open text channel for the `channel` view */
+  channel?: string;
+  /** message overrides per channel */
+  channels?: Record<string, SimMessage[]>;
   composer?: string;
   attachment?: 'result' | null;
+  /** display name of "me" before setting a server nickname */
+  meName?: string;
+  /** false → not a member yet (invite flow) */
+  joined?: boolean;
+  following?: boolean;
 }
 
 type DeviceOnly = { only?: Device };
@@ -84,15 +103,18 @@ export type SimStep =
   | ({ tap: string; try?: boolean; hint?: string } & DeviceOnly)
   | ({ point: string } & DeviceOnly)
   | ({ highlight: string; ms?: number } & DeviceOnly)
-  | ({ view: 'home' | 'thread' } & DeviceOnly)
+  | ({ view: SimView; channel?: string } & DeviceOnly)
   | ({ picker: 'menu' | 'gallery' | 'none' } & DeviceOnly)
+  | ({ menu: 'server' | 'none' } & DeviceOnly)
   | ({ attach: 'result' } & DeviceOnly)
-  | ({ type: string } & DeviceOnly)
-  | ({ send: true; try?: boolean; hint?: string } & DeviceOnly)
+  | ({ type: string; into?: 'composer' | 'search' | 'nick' } & DeviceOnly)
+  | ({ send: true; try?: boolean; hint?: string; as?: string; id?: string } & DeviceOnly)
   | ({ typing: string; ms?: number } & DeviceOnly)
   | ({ msg: SimMessage } & DeviceOnly)
   | ({ react: { msg: string; emoji: string; by: string } } & DeviceOnly)
   | ({ tags: { post: string; tags: string[] } } & DeviceOnly)
+  | ({ filter: string | null } & DeviceOnly)
+  | ({ follow: true } & DeviceOnly)
   | ({ online: string } & DeviceOnly)
   | ({ notify: { title: string; body: string } } & DeviceOnly);
 

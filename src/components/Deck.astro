@@ -72,7 +72,7 @@ const payload = {
               <div class="deck__visual deck__visual--sim" data-visual={i} />
             ) : (
               <div class="deck__visual" data-visual={i}>
-                <DeckVisual visual={s.visual} locale={locale} xp={mission.xp} />
+                <DeckVisual visual={s.visual} locale={locale} xp={mission.xp} badge={mission.badge} />
               </div>
             ),
           )

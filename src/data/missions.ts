@@ -10,6 +10,8 @@ export interface Mission {
   badge: string;
   /** false → page shows "coming soon" */
   ready: boolean;
+  /** core competition task, highlighted on the map */
+  key?: boolean;
 }
 
 export const missions: Record<Locale, Mission[]> = {
@@ -22,7 +24,7 @@ export const missions: Record<Locale, Mission[]> = {
       minutes: 3,
       xp: 100,
       badge: 'Pendatang Baru',
-      ready: false,
+      ready: true,
     },
     {
       slug: 'masuk-server',
@@ -32,7 +34,7 @@ export const missions: Record<Locale, Mission[]> = {
       minutes: 2,
       xp: 100,
       badge: 'Warga TEC',
-      ready: false,
+      ready: true,
     },
     {
       slug: 'tur-server',
@@ -42,7 +44,7 @@ export const missions: Record<Locale, Mission[]> = {
       minutes: 3,
       xp: 100,
       badge: 'Penjelajah',
-      ready: false,
+      ready: true,
     },
     {
       slug: 'cari-jadwal',
@@ -52,7 +54,8 @@ export const missions: Record<Locale, Mission[]> = {
       minutes: 3,
       xp: 100,
       badge: 'Tepat Waktu',
-      ready: false,
+      ready: true,
+      key: true,
     },
     {
       slug: 'atur-waktu',
@@ -62,7 +65,7 @@ export const missions: Record<Locale, Mission[]> = {
       minutes: 2,
       xp: 100,
       badge: 'Diplomat',
-      ready: false,
+      ready: true,
     },
     {
       slug: 'lapor-hasil',
@@ -73,6 +76,7 @@ export const missions: Record<Locale, Mission[]> = {
       xp: 100,
       badge: 'Pelapor Andal',
       ready: true,
+      key: true,
     },
     {
       slug: 'sengketa-wo',
@@ -82,7 +86,7 @@ export const missions: Record<Locale, Mission[]> = {
       minutes: 2,
       xp: 100,
       badge: 'Sportif',
-      ready: false,
+      ready: true,
     },
     {
       slug: 'minta-bantuan',
@@ -92,7 +96,7 @@ export const missions: Record<Locale, Mission[]> = {
       minutes: 2,
       xp: 100,
       badge: 'Pemberani',
-      ready: false,
+      ready: true,
     },
   ],
 };

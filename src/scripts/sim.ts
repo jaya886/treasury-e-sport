@@ -1,5 +1,5 @@
 // Discord simulator: renders a mock Discord UI (desktop or phone) and plays scripted steps on it.
-import type { Device, Mode, SimMessage, SimPost, SimServer, SimSetup, SimStep } from '../lib/sim-types';
+import type { Device, Mode, SimChannel, SimMessage, SimPost, SimServer, SimSetup, SimStep, SimView } from '../lib/sim-types';
 import { resultShotMarkup } from '../lib/shot';
 
 const SIZE: Record<Device, { w: number; h: number }> = {
@@ -17,9 +17,14 @@ export interface RunControl {
 }
 
 interface State extends SimSetup {
+  channels: Record<string, SimMessage[]>;
   picker: 'none' | 'menu' | 'gallery';
+  menu: 'none' | 'server';
   typing: string | null;
   fresh: Set<string>;
+  search: string;
+  filter: string | null;
+  nickDraft: string;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -50,6 +55,10 @@ const ICONS: Record<string, string> = {
   user: '<circle cx="12" cy="9" r="4" /><path d="M5 20a7 7 0 0 1 14 0" />',
   pin: '<path d="M9 4h6l-1 6 3 3H7l3-3-1-6ZM12 13v7" />',
   members: '<circle cx="9" cy="9" r="3.5" /><path d="M3 19a6 6 0 0 1 12 0" /><circle cx="17" cy="8" r="2.5" /><path d="M16 13.5a5 5 0 0 1 5 5" />',
+  pencil: '<path d="M4 20h4L19 9l-4-4L4 16v4Z" /><path d="m13.5 6.5 4 4" />',
+  invite: '<circle cx="10" cy="9" r="4" /><path d="M3 20a7 7 0 0 1 14 0" /><path d="M19 8v6M16 11h6" />',
+  check: '<path d="m5 12 5 5 9-10" />',
+  tag: '<path d="M4 4h8l8 8-8 8-8-8V4Z" /><circle cx="8.5" cy="8.5" r="1.5" />',
 };
 
 const icon = (name: string, cls = '') =>
@@ -63,6 +72,8 @@ function initials(name: string) {
   return first.slice(0, 1).toUpperCase();
 }
 
+const shortTitle = (title: string, max = 28) => (title.length > max ? `${title.slice(0, max - 1)}…` : title);
+
 /* ------------------------------------------------------------------------ */
 
 export class DiscordSim {
@@ -72,19 +83,17 @@ export class DiscordSim {
   private canvas: HTMLElement;
   private screen: HTMLElement;
   private cursor: HTMLElement;
-  private subtitle: HTMLElement;
   private overlay: HTMLElement;
+  private caption: HTMLElement | null;
   private state!: State;
   private scale = 1;
   private ambientTimer: number | undefined;
   private cursorPos = { x: 0, y: 0 };
   private baseUsers: SimServer['users'];
 
-  private caption: HTMLElement | null;
-
   constructor(el: HTMLElement, server: SimServer, caption: HTMLElement | null = null) {
-    this.caption = caption;
     this.el = el;
+    this.caption = caption;
     this.server = structuredClone(server);
     this.baseUsers = structuredClone(server.users);
     el.innerHTML = `
@@ -101,7 +110,6 @@ export class DiscordSim {
     this.screen = el.querySelector('.sim-screen')!;
     this.overlay = el.querySelector('.sim-overlay')!;
     this.cursor = el.querySelector('.sim-cursor')!;
-    this.subtitle = el.querySelector('.sim-subtitle')!;
     new ResizeObserver(() => this.fit()).observe(el);
   }
 
@@ -124,13 +132,20 @@ export class DiscordSim {
 
   load(setup: SimSetup) {
     this.server.users = structuredClone(this.baseUsers);
+    const s = structuredClone(setup);
     this.state = {
-      ...structuredClone(setup),
-      composer: setup.composer ?? '',
-      attachment: setup.attachment ?? null,
+      ...s,
+      channels: { ...structuredClone(this.server.channels), ...(s.channels ?? {}) },
+      composer: s.composer ?? '',
+      attachment: s.attachment ?? null,
+      joined: s.joined ?? true,
       picker: 'none',
+      menu: 'none',
       typing: null,
       fresh: new Set(),
+      search: '',
+      filter: null,
+      nickDraft: '',
     };
     this.overlay.innerHTML = '';
     this.say('');
@@ -151,23 +166,59 @@ export class DiscordSim {
     this.state.fresh.clear();
   }
 
+  /* ---------------------------- data helpers ---------------------------- */
+
+  private userName(id: string) {
+    if (id === this.server.me && this.state.meName) return this.state.meName;
+    return this.server.users[id]?.name ?? id;
+  }
+
+  private channelById(id: string): SimChannel | undefined {
+    for (const c of this.server.categories) {
+      const ch = c.channels.find((x) => x.id === id);
+      if (ch) return ch;
+    }
+    return undefined;
+  }
+
+  private currentPost(): SimPost {
+    return this.state.posts.find((p) => p.id === this.state.post) ?? this.state.posts[0];
+  }
+
+  /** Messages of whatever conversation is open. */
+  private currentMessages(): SimMessage[] {
+    const st = this.state;
+    if (st.view === 'channel' || st.view === 'home') {
+      const id = st.view === 'home' ? 'pengumuman' : st.channel ?? 'general';
+      st.channels[id] ??= [];
+      return st.channels[id];
+    }
+    return this.currentPost().replies;
+  }
+
+  private forumList() {
+    const st = this.state;
+    const seen = new Set(st.posts.map((p) => p.id));
+    const all = [...st.posts, ...this.server.forumPosts.filter((p) => !seen.has(p.id))];
+    const q = st.search.trim().toLowerCase();
+    return all.filter((p) => (!st.filter || p.tags.includes(st.filter)) && (!q || p.title.toLowerCase().includes(q)));
+  }
+
   /* ---------------------------- markup ---------------------------------- */
 
   private fmt(text: string) {
     const meId = this.server.me;
     return esc(text)
+      .replace(/`([^`]+)`/g, '<code class="dc-code">$1</code>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/&lt;@(\w+)&gt;/g, (_, id) => {
-        const u = this.server.users[id];
-        return `<span class="dc-mention${id === meId ? ' is-me' : ''}">@${esc(u ? u.name : id)}</span>`;
-      })
+      .replace(/&lt;@(\w+)&gt;/g, (_, id) => `<span class="dc-mention${id === meId ? ' is-me' : ''}">@${esc(this.userName(id))}</span>`)
       .replace(/&lt;#([\w-]+)&gt;/g, (_, id) => `<span class="dc-mention">#${esc(id)}</span>`)
       .replace(/\[ts:(.+?)\]/g, '<span class="dc-ts">$1</span>');
   }
 
   private avatar(userId: string, size = 40) {
     const u = this.server.users[userId];
-    return `<span class="dc-avatar" style="--c:${u?.color ?? '#5865f2'};--s:${size}px">${esc(initials(u?.name ?? '?'))}${
+    return `<span class="dc-avatar" style="--c:${u?.color ?? '#5865f2'};--s:${size}px">${esc(initials(this.userName(userId)))}${
       u?.online ? '<i class="dc-presence"></i>' : ''
     }</span>`;
   }
@@ -176,7 +227,7 @@ export class DiscordSim {
     const u = this.server.users[userId];
     if (!u) return '';
     const role = u.role ? `<span class="dc-role" style="--rc:${u.roleColor}">${esc(u.role)}</span>` : '';
-    return `<span class="dc-name" style="color:${u.roleColor ?? '#f2f3f5'}">${esc(u.name)}</span>${role}`;
+    return `<span class="dc-name" style="color:${u.roleColor ?? '#f2f3f5'}">${esc(this.userName(userId))}</span>${role}`;
   }
 
   private messageHTML(m: SimMessage) {
@@ -208,21 +259,19 @@ export class DiscordSim {
       .join('');
   }
 
-  private currentPost(): SimPost {
-    return this.state.posts.find((p) => p.id === this.state.post) ?? this.state.posts[0];
-  }
-
   private channelListHTML() {
     const s = this.server;
+    const st = this.state;
     return s.categories
       .map((cat) => {
         const items = cat.channels
           .map((ch) => {
             const threads =
               ch.id === s.forum
-                ? this.state.posts
+                ? st.posts
+                    .filter((p) => p.joined !== false)
                     .map((p) => {
-                      const active = this.state.view === 'thread' && p.id === this.state.post;
+                      const active = st.view === 'thread' && p.id === st.post;
                       return `<div class="dc-thread${active ? ' is-active' : ''}${p.mention ? ' is-unread' : ''}" data-t="thread:${p.id}">
                         <span class="dc-thread__branch"></span><span class="dc-thread__name">${esc(p.title)}</span>${
                           p.mention ? '<span class="dc-badge">1</span>' : ''
@@ -230,32 +279,53 @@ export class DiscordSim {
                     })
                     .join('')
                 : '';
-            const active = this.state.view === 'home' && ch.id === 'pengumuman' && this.device === 'desktop';
+            const openId =
+              st.view === 'channel' ? st.channel : st.view === 'forum' ? s.forum : st.view === 'home' && this.device === 'desktop' ? 'pengumuman' : null;
+            const active = ch.id === openId;
             return `<div class="dc-ch${active ? ' is-active' : ''}${ch.unread ? ' is-unread' : ''}" data-t="ch:${ch.id}" data-ch="${ch.id}">
-                ${channelIcon(ch.kind)}<span class="dc-ch__name">${ch.emoji ? `${ch.emoji}` : ''}${esc(ch.name)}</span>${
+                ${channelIcon(ch.kind)}<span class="dc-ch__name">${ch.emoji ?? ''}${esc(ch.name)}</span>${
                   ch.locked ? icon('lock', 'dc-ch__lock') : ''
                 }
               </div>${threads}`;
           })
           .join('');
-        return `<div class="dc-cat"><div class="dc-cat__name">${icon('chevron')}${cat.emoji ?? ''} ${esc(cat.name)}</div>${items}</div>`;
+        return `<div class="dc-cat" data-t="cat:${esc(cat.name)}"><div class="dc-cat__name">${icon('chevron')}${cat.emoji ?? ''} ${esc(cat.name)}</div>${items}</div>`;
       })
       .join('');
   }
 
   private railHTML() {
+    const joined = this.state.joined;
     return `
       <div class="dc-rail">
         <div class="dc-rail__item dc-rail__dm">${icon('chat')}</div>
         <div class="dc-rail__sep"></div>
-        <div class="dc-rail__item is-active dc-rail__tec"><span>TEC</span></div>
+        ${joined ? `<div class="dc-rail__item is-active dc-rail__tec" data-t="rail:tec"><span>TEC</span></div>` : ''}
         <div class="dc-rail__item">FC</div>
         <div class="dc-rail__item dc-rail__add">${icon('plus')}</div>
       </div>`;
   }
 
+  private serverHeaderHTML() {
+    const menu =
+      this.state.menu === 'server' && this.device === 'desktop'
+        ? `<div class="dc-dropdown">
+            <div class="dc-dropdown__item">${icon('invite')} Undang Orang</div>
+            <div class="dc-dropdown__item">${icon('bell')} Pengaturan Notifikasi</div>
+            <div class="dc-dropdown__item is-hot" data-t="edit-profile">${icon('pencil')} Edit Profil Server</div>
+            <div class="dc-dropdown__item">${icon('hash')} Tampilkan Semua Channel</div>
+          </div>`
+        : '';
+    return `<div class="dc-server" data-t="server-menu">${esc(this.server.name)} ${icon('chevron')}</div>${menu}`;
+  }
+
+  private placeholder() {
+    const st = this.state;
+    if (st.view === 'channel') return `Kirim pesan ke #${this.channelById(st.channel ?? '')?.name ?? st.channel}`;
+    return `Kirim pesan ke ${shortTitle(this.currentPost().title)}`;
+  }
+
   private composerHTML() {
-    const post = this.currentPost();
     const { composer, attachment, picker } = this.state;
     const hasContent = Boolean(composer || attachment);
     const sendBtn =
@@ -278,7 +348,9 @@ export class DiscordSim {
           <div class="dc-composer__row">
             <button class="dc-plus" data-t="plus" tabindex="-1">${icon('plus')}</button>
             <div class="dc-input" data-t="composer">${
-              composer ? `<span class="dc-input__text">${esc(composer)}</span><span class="dc-caret"></span>` : `<span class="dc-input__ph">Kirim pesan ke ${esc(this.shortTitle(post.title))}</span>`
+              composer
+                ? `<span class="dc-input__text">${esc(composer)}</span><span class="dc-caret"></span>`
+                : `<span class="dc-input__ph">${esc(this.placeholder())}</span>`
             }</div>
             ${this.device === 'desktop' ? `<span class="dc-composer__icons">${icon('gift')}${icon('emoji')}</span>` : ''}
             ${sendBtn}
@@ -288,18 +360,25 @@ export class DiscordSim {
       </div>`;
   }
 
+  private lockedComposerHTML() {
+    return `<div class="dc-composer-wrap"><div class="dc-composer dc-composer--locked">${icon('lock')} Kamu tidak punya izin mengirim pesan di channel ini.</div></div>`;
+  }
+
   private typingHTML() {
-    const u = this.state.typing ? this.server.users[this.state.typing] : null;
-    return `<div class="dc-typing${u ? ' is-on' : ''}">${
-      u ? `<span class="dc-typing__dots"><i></i><i></i><i></i></span><b>${esc(u.name)}</b> sedang mengetik…` : ''
+    const id = this.state.typing;
+    return `<div class="dc-typing${id ? ' is-on' : ''}">${
+      id ? `<span class="dc-typing__dots"><i></i><i></i><i></i></span><b>${esc(this.userName(id))}</b> sedang mengetik…` : ''
     }</div>`;
   }
 
-  private shortTitle(title: string) {
-    return title.length > 28 ? `${title.slice(0, 27)}…` : title;
+  private followHTML() {
+    const on = this.state.following;
+    return `<span class="dc-follow${on ? ' is-on' : ''}" data-t="follow">${icon(on ? 'check' : 'bell')}${on ? 'Mengikuti' : 'Ikuti'}</span>`;
   }
 
-  private threadHTML() {
+  /* ---- conversation bodies ---- */
+
+  private threadBodyHTML() {
     const post = this.currentPost();
     const starter = `
       <div class="dc-starter">
@@ -317,6 +396,83 @@ export class DiscordSim {
     return `<div class="dc-messages">${starter}${post.replies.map((m) => this.messageHTML(m)).join('')}</div>`;
   }
 
+  private channelBodyHTML(id: string) {
+    const ch = this.channelById(id);
+    const msgs = this.state.channels[id] ?? [];
+    const welcome = `<div class="dc-welcome"><div class="dc-welcome__icon">${channelIcon(ch?.kind ?? 'text')}</div>
+      <h3>Selamat datang di #${esc((ch?.emoji ?? '') + (ch?.name ?? id))}!</h3><p>${esc(ch?.topic ?? 'Awal channel ini.')}</p></div>`;
+    return `<div class="dc-messages">${welcome}${msgs.map((m) => this.messageHTML(m)).join('')}</div>`;
+  }
+
+  private isReadOnly(id: string) {
+    const kind = this.channelById(id)?.kind;
+    return kind === 'announce' || kind === 'rules';
+  }
+
+  private forumBodyHTML() {
+    const st = this.state;
+    const tags = ['MLBB', 'Dota 2', 'Catur', 'MCGG'];
+    const chips = tags
+      .map((t) => `<span class="dc-chip${st.filter === t ? ' is-on' : ''}" data-t="filter:${t}">${esc(t)}</span>`)
+      .join('');
+    const cards = this.forumList()
+      .map(
+        (p) => `
+        <div class="dc-post${p.mention ? ' is-unread' : ''}" data-t="post:${p.id}">
+          <div class="dc-post__title">${esc(p.title)}${p.mention ? '<span class="dc-badge">1</span>' : ''}</div>
+          <div class="dc-post__tags">${this.tagsHTML(p.tags)}</div>
+          <div class="dc-post__meta">${this.avatar(p.author, 18)}<span>${esc(this.userName(p.author))}</span><span>· ${icon('chat')} ${p.replies.length}</span></div>
+        </div>`,
+      )
+      .join('');
+    return `
+      <div class="dc-forum">
+        <div class="dc-forum__bar">
+          <div class="dc-search" data-t="search">${icon('search')}${
+            st.search ? `<span class="dc-input__text">${esc(st.search)}</span><span class="dc-caret"></span>` : '<span class="dc-input__ph">Cari postingan…</span>'
+          }</div>
+        </div>
+        <div class="dc-forum__chips">${icon('tag')}${chips}</div>
+        <div class="dc-forum__list">${cards || '<p class="dc-empty">Tidak ada postingan yang cocok.</p>'}</div>
+      </div>`;
+  }
+
+  /* ---- special screens ---- */
+
+  private inviteHTML() {
+    const s = this.server;
+    return `
+      <div class="dc-invite">
+        <div class="dc-invite__card">
+          <div class="dc-invite__icon dc-rail__tec"><span>TEC</span></div>
+          <p class="dc-invite__lead">Kamu diundang untuk bergabung ke</p>
+          <h3 class="dc-invite__name">${esc(s.name)}</h3>
+          <p class="dc-invite__stats"><i class="is-on"></i>${s.stats.online} Online <i></i>${s.stats.members} Anggota</p>
+          <button class="dc-invite__btn" data-t="accept" tabindex="-1">Terima Undangan</button>
+        </div>
+      </div>`;
+  }
+
+  private nicknameHTML() {
+    const st = this.state;
+    const me = this.server.me;
+    return `
+      <div class="dc-nick">
+        <div class="dc-nick__box">
+          <div class="dc-nick__title">Edit Profil Server</div>
+          <p class="dc-nick__sub">${esc(this.server.name)}</p>
+          <label class="dc-nick__label">NAMA PANGGILAN SERVER</label>
+          <div class="dc-nick__input" data-t="nick">${
+            st.nickDraft
+              ? `<span class="dc-input__text">${esc(st.nickDraft)}</span><span class="dc-caret"></span>`
+              : `<span class="dc-input__ph">${esc(this.userName(me))}</span>`
+          }</div>
+          <div class="dc-nick__preview">${this.avatar(me, 44)}<div><b>${esc(st.nickDraft || this.userName(me))}</b><small>Pratinjau</small></div></div>
+          <button class="dc-nick__save" data-t="save" tabindex="-1">Simpan Perubahan</button>
+        </div>
+      </div>`;
+  }
+
   private pickerHTML() {
     if (this.state.picker !== 'gallery') return '';
     const thumbs = `
@@ -328,66 +484,114 @@ export class DiscordSim {
       : `<div class="dc-dialog"><div class="dc-dialog__box"><div class="dc-dialog__title">Pilih file untuk diunggah</div><div class="dc-gallery">${thumbs}</div></div></div>`;
   }
 
+  private mobileServerSheet() {
+    if (this.state.menu !== 'server') return '';
+    return `<div class="dc-sheet dc-sheet--menu"><div class="dc-sheet__handle"></div><div class="dc-sheet__title">${esc(this.server.name)}</div>
+      <div class="dc-dropdown__item">${icon('invite')} Undang</div>
+      <div class="dc-dropdown__item">${icon('bell')} Notifikasi</div>
+      <div class="dc-dropdown__item is-hot" data-t="edit-profile">${icon('pencil')} Edit Profil Server</div></div>`;
+  }
+
+  /* ---- desktop ---- */
+
+  private desktopMainHTML() {
+    const s = this.server;
+    const st = this.state;
+    const icons = `<span class="dc-header__icons">${icon('bell')}${icon('pin')}${icon('members')}${icon('search')}</span>`;
+    if (st.view === 'thread') {
+      const post = this.currentPost();
+      return `<div class="dc-header">${icon('forum')}<span class="dc-header__crumb">${esc(s.forum)}</span><span class="dc-header__sep">›</span><b>${esc(post.title)}</b><span class="dc-header__tags" data-t="tags:${post.id}">${this.tagsHTML(post.tags.slice(1))}</span>${this.followHTML()}${icons}</div>
+        ${this.threadBodyHTML()}${this.composerHTML()}`;
+    }
+    if (st.view === 'forum') {
+      return `<div class="dc-header">${icon('forum')}<b>🏅${esc(s.forum)}</b><span class="dc-header__topic">${esc(this.channelById(s.forum)?.topic ?? '')}</span>${icons}</div>${this.forumBodyHTML()}`;
+    }
+    const id = st.view === 'channel' ? st.channel ?? 'general' : 'pengumuman';
+    const ch = this.channelById(id);
+    return `<div class="dc-header">${channelIcon(ch?.kind ?? 'text')}<b>${esc((ch?.emoji ?? '') + (ch?.name ?? id))}</b><span class="dc-header__topic">${esc(ch?.topic ?? '')}</span>${icons}</div>
+      ${this.channelBodyHTML(id)}${this.isReadOnly(id) ? this.lockedComposerHTML() : this.composerHTML()}`;
+  }
+
   private desktopHTML() {
     const s = this.server;
-    const post = this.currentPost();
-    const me = s.users[s.me];
-    const main =
-      this.state.view === 'thread'
-        ? `<div class="dc-header">${icon('forum')}<span class="dc-header__crumb">${esc(s.forum)}</span><span class="dc-header__sep">›</span><b>${esc(post.title)}</b><span class="dc-header__tags" data-t="tags:${post.id}">${this.tagsHTML(post.tags.slice(1))}</span><span class="dc-header__icons">${icon('bell')}${icon('pin')}${icon('members')}${icon('search')}</span></div>
-           ${this.threadHTML()}${this.composerHTML()}`
-        : `<div class="dc-header">${icon('announce')}<b>📣pengumuman</b><span class="dc-header__icons">${icon('bell')}${icon('pin')}${icon('members')}${icon('search')}</span></div>
-           <div class="dc-messages"><div class="dc-welcome"><div class="dc-welcome__icon">${icon('announce')}</div><h3>Selamat datang di #📣pengumuman!</h3><p>Info resmi dari panitia TEC 2026.</p></div>${this.messageHTML(s.announcement)}</div>
-           <div class="dc-composer-wrap"><div class="dc-composer dc-composer--locked">${icon('lock')} Kamu tidak punya izin mengirim pesan di channel ini.</div></div>`;
+    const st = this.state;
+    if (st.view === 'invite') return `<div class="dc dc--desktop dc--invite">${this.inviteHTML()}</div>`;
     return `
       <div class="dc dc--desktop">
         ${this.railHTML()}
         <aside class="dc-side">
-          <div class="dc-server">${esc(s.name)} ${icon('chevron')}</div>
+          ${this.serverHeaderHTML()}
           <div class="dc-side__scroll">${this.channelListHTML()}</div>
-          <div class="dc-me">${this.avatar(s.me, 32)}<div><b>${esc(me.name.split('|')[0])}</b><small>Online</small></div></div>
+          <div class="dc-me" data-t="me">${this.avatar(s.me, 32)}<div><b>${esc(this.userName(s.me).split('|')[0])}</b><small>Online</small></div></div>
         </aside>
-        <section class="dc-main">${main}</section>
+        <section class="dc-main">${this.desktopMainHTML()}</section>
         ${this.pickerHTML()}
+        ${st.view === 'nickname' ? this.nicknameHTML() : ''}
       </div>`;
   }
 
+  /* ---- mobile ---- */
+
   private mobileHTML() {
     const s = this.server;
-    const post = this.currentPost();
+    const st = this.state;
     const status = `<div class="m-status"><b>20.14</b><span>▂▄▆ 4G ▮▮▮</span></div>`;
-    if (this.state.view === 'thread') {
-      return `
-        <div class="dc dc--mobile">
-          ${status}
-          <div class="m-header">
-            <span class="m-back" data-t="back">${icon('back')}</span>
-            <div class="m-header__title"><b>${esc(this.shortTitle(post.title))}</b><small>${icon('forum')} ${esc(s.forum)} <span class="dc-header__tags" data-t="tags:${post.id}">${this.tagsHTML(post.tags.slice(1))}</span></small></div>
-            <span class="m-header__icons">${icon('members')}</span>
-          </div>
-          ${this.threadHTML()}
-          ${this.composerHTML()}
-          ${this.pickerHTML()}
-        </div>`;
-    }
-    return `
-      <div class="dc dc--mobile">
-        ${status}
-        <div class="m-home">
-          ${this.railHTML()}
-          <div class="m-channels">
-            <div class="dc-server">${esc(s.name)} ${icon('chevron')}</div>
-            <div class="m-search">${icon('search')} Cari</div>
-            <div class="dc-side__scroll">${this.channelListHTML()}</div>
-          </div>
+    const wrap = (inner: string, extra = '') => `<div class="dc dc--mobile ${extra}">${status}${inner}</div>`;
+
+    if (st.view === 'invite') return wrap(this.inviteHTML(), 'dc--invite');
+    if (st.view === 'nickname') return wrap(this.nicknameHTML(), 'dc--nickpage');
+
+    if (st.view === 'thread') {
+      const post = this.currentPost();
+      return wrap(`
+        <div class="m-header">
+          <span class="m-back" data-t="back">${icon('back')}</span>
+          <div class="m-header__title"><b>${esc(shortTitle(post.title))}</b><small>${icon('forum')} ${esc(s.forum)} <span class="dc-header__tags" data-t="tags:${post.id}">${this.tagsHTML(post.tags.slice(1))}</span></small></div>
+          ${this.followHTML()}
         </div>
-        <nav class="m-tabs">
-          <span class="is-active">${icon('home')}<small>Server</small></span>
-          <span>${icon('chat')}<small>Pesan</small></span>
-          <span>${icon('bell')}<small>Notifikasi</small></span>
-          <span>${this.avatar(s.me, 22)}<small>Kamu</small></span>
-        </nav>
-      </div>`;
+        ${this.threadBodyHTML()}
+        ${this.composerHTML()}
+        ${this.pickerHTML()}`);
+    }
+
+    if (st.view === 'forum') {
+      return wrap(`
+        <div class="m-header">
+          <span class="m-back" data-t="back">${icon('back')}</span>
+          <div class="m-header__title"><b>🏅${esc(s.forum)}</b><small>${esc(this.channelById(s.forum)?.topic ?? '')}</small></div>
+        </div>
+        ${this.forumBodyHTML()}`);
+    }
+
+    if (st.view === 'channel') {
+      const id = st.channel ?? 'general';
+      const ch = this.channelById(id);
+      return wrap(`
+        <div class="m-header">
+          <span class="m-back" data-t="back">${icon('back')}</span>
+          <div class="m-header__title"><b>${channelIcon(ch?.kind ?? 'text')} ${esc((ch?.emoji ?? '') + (ch?.name ?? id))}</b><small>${esc(ch?.topic ?? '')}</small></div>
+          <span class="m-header__icons">${icon('members')}</span>
+        </div>
+        ${this.channelBodyHTML(id)}
+        ${this.isReadOnly(id) ? this.lockedComposerHTML() : this.composerHTML()}`);
+    }
+
+    return wrap(`
+      <div class="m-home">
+        ${this.railHTML()}
+        <div class="m-channels">
+          ${this.serverHeaderHTML()}
+          <div class="m-search">${icon('search')} Cari</div>
+          <div class="dc-side__scroll">${this.channelListHTML()}</div>
+        </div>
+      </div>
+      <nav class="m-tabs">
+        <span class="is-active" data-t="tab:server">${icon('home')}<small>Server</small></span>
+        <span data-t="tab:pesan">${icon('chat')}<small>Pesan</small></span>
+        <span data-t="tab:notif">${icon('bell')}<small>Notifikasi</small></span>
+        <span data-t="tab:kamu">${this.avatar(s.me, 22)}<small>Kamu</small></span>
+      </nav>
+      ${this.mobileServerSheet()}`);
   }
 
   /* ---------------------------- ambient life ---------------------------- */
@@ -399,7 +603,7 @@ export class DiscordSim {
       if (document.hidden) return;
       const id = idle[Math.floor(Math.random() * idle.length)];
       const ch = this.screen.querySelector<HTMLElement>(`[data-ch="${id}"]`);
-      ch?.classList.toggle('is-unread');
+      if (ch && !ch.classList.contains('is-active')) ch.classList.toggle('is-unread');
     }, 2600);
   }
 
@@ -416,7 +620,9 @@ export class DiscordSim {
   }
 
   private find(target: string) {
-    return this.canvas.querySelector<HTMLElement>(`[data-t="${CSS.escape(target)}"]`);
+    const el = this.canvas.querySelector<HTMLElement>(`[data-t="${CSS.escape(target)}"]`);
+    if (!el) console.warn(`[sim] target not found: ${target} (${this.device}, view=${this.state.view})`);
+    return el;
   }
 
   private centerOf(el: HTMLElement) {
@@ -493,7 +699,8 @@ export class DiscordSim {
   }
 
   private say(text: string) {
-    const el = this.caption ?? this.subtitle;
+    const el = this.caption ?? this.el.querySelector<HTMLElement>('.sim-subtitle');
+    if (!el) return;
     el.textContent = text;
     el.classList.toggle('is-on', Boolean(text));
   }
@@ -503,7 +710,7 @@ export class DiscordSim {
   }
 
   private pushMessage(m: SimMessage) {
-    this.currentPost().replies.push(m);
+    this.currentMessages().push(m);
     this.state.fresh.add(m.id);
     this.render();
   }
@@ -546,9 +753,9 @@ export class DiscordSim {
       }
       if ('send' in step) {
         const m: SimMessage = {
-          id: `me-${Date.now()}`,
+          id: step.id ?? `me-${Date.now()}`,
           author: this.server.me,
-          text: st.composer ?? '',
+          text: step.as ?? st.composer ?? '',
           time: 'Hari ini 20.14',
           attachment: st.attachment ?? undefined,
         };
@@ -561,10 +768,15 @@ export class DiscordSim {
     }
 
     if ('view' in step) {
+      const prev = st.view;
+      if (prev === 'nickname' && step.view !== 'nickname' && st.nickDraft) st.meName = st.nickDraft;
+      if (prev === 'invite' && step.view !== 'invite') st.joined = true;
+      if (step.view === 'nickname') st.nickDraft = '';
       st.view = step.view;
+      if (step.channel) st.channel = step.channel;
       st.picker = 'none';
-      const post = this.currentPost();
-      if (step.view === 'thread') post.mention = false;
+      st.menu = 'none';
+      if (step.view === 'thread') Object.assign(this.currentPost(), { mention: false, joined: true });
       this.screen.classList.add('is-switching');
       await this.sleep(140, ctl);
       this.render();
@@ -580,6 +792,13 @@ export class DiscordSim {
       return;
     }
 
+    if ('menu' in step) {
+      st.menu = step.menu;
+      this.render();
+      await this.sleep(450, ctl);
+      return;
+    }
+
     if ('attach' in step) {
       st.attachment = step.attach;
       st.picker = 'none';
@@ -589,20 +808,41 @@ export class DiscordSim {
     }
 
     if ('type' in step) {
-      const input = () => this.find('composer');
-      st.composer = st.composer ?? '';
-      this.render();
+      const into = step.into ?? 'composer';
       for (const ch of step.type) {
         if (ctl.cancelled) return;
-        st.composer += ch;
-        const el = input();
-        if (el) {
-          el.innerHTML = `<span class="dc-input__text">${esc(st.composer)}</span><span class="dc-caret"></span>`;
-          el.scrollTop = el.scrollHeight;
+        if (into === 'composer') {
+          st.composer = (st.composer ?? '') + ch;
+          const el = this.find('composer');
+          if (el) {
+            el.innerHTML = `<span class="dc-input__text">${esc(st.composer)}</span><span class="dc-caret"></span>`;
+            el.scrollTop = el.scrollHeight;
+          }
+        } else if (into === 'nick') {
+          st.nickDraft += ch;
+          this.render();
+        } else {
+          st.search += ch;
+          this.render();
         }
-        await this.sleep(ch === '\n' ? 180 : 22 + Math.random() * 38, ctl);
+        await this.sleep(ch === '\n' ? 180 : 30 + Math.random() * 45, ctl);
       }
       this.render();
+      return;
+    }
+
+    if ('filter' in step) {
+      st.filter = step.filter;
+      this.render();
+      await this.sleep(500, ctl);
+      return;
+    }
+
+    if ('follow' in step) {
+      st.following = true;
+      this.render();
+      this.find('follow')?.classList.add('is-flash');
+      await this.sleep(700, ctl);
       return;
     }
 
@@ -623,15 +863,14 @@ export class DiscordSim {
 
     if ('react' in step) {
       const { msg, emoji, by } = step.react;
-      const m = this.currentPost().replies.find((r) => r.id === msg || (msg === '$last-mine' && r.author === this.server.me));
+      const m = this.currentMessages().find((r) => r.id === msg);
       if (m) {
         m.reactions ??= [];
         const existing = m.reactions.find((r) => r.emoji === emoji);
         if (existing) existing.count++;
         else m.reactions.push({ emoji, count: 1, mine: by === this.server.me });
         this.render();
-        const pill = this.screen.querySelector<HTMLElement>(`[data-t="react:${CSS.escape(m.id)}:${CSS.escape(emoji)}"]`);
-        pill?.classList.add('is-pop');
+        this.screen.querySelector<HTMLElement>(`[data-t="react:${CSS.escape(m.id)}:${CSS.escape(emoji)}"]`)?.classList.add('is-pop');
       }
       await this.sleep(700, ctl);
       return;

@@ -1,0 +1,107 @@
+---
+// Looping, non-interactive preview of a mission scene (phone layout) for the homepage.
+import '../styles/sim.css';
+import { server } from '../data/server';
+import { heroDemo } from '../decks/id/demo';
+
+interface Props {
+  label: string;
+}
+
+const { label } = Astro.props;
+const payload = JSON.stringify({ server, scene: heroDemo }).replace(/</g, '\\u003c');
+---
+
+<figure class="demo" data-hero-demo>
+  <figcaption class="demo__label hud hud--yellow"><span class="demo__rec"></span>{label}</figcaption>
+  <div class="demo__screen">
+    <div class="sim" data-sim></div>
+  </div>
+  <div class="demo__caption" data-caption aria-live="off"></div>
+  <script type="application/json" set:html={payload} />
+</figure>
+
+<script>
+  import { DiscordSim, type RunControl } from '../scripts/sim';
+  import type { SimScene, SimServer } from '../lib/sim-types';
+
+  const root = document.querySelector<HTMLElement>('[data-hero-demo]');
+  if (root && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const { server, scene }: { server: SimServer; scene: SimScene } = JSON.parse(
+      root.querySelector('script[type="application/json"]')!.textContent || '{}',
+    );
+    const sim = new DiscordSim(root.querySelector<HTMLElement>('[data-sim]')!, server, root.querySelector<HTMLElement>('[data-caption]'));
+    sim.setDevice('mobile');
+    const ctl: RunControl = { cancelled: false, paused: false, speed: 1.15, mode: 'watch', labels: { tapHere: '', skip: '' } };
+
+    // Pause while off-screen.
+    new IntersectionObserver((e) => (ctl.paused = !e[0].isIntersecting)).observe(root);
+
+    (async () => {
+      for (;;) {
+        sim.load(scene.setup);
+        await sim.run(scene.steps, ctl);
+      }
+    })();
+  }
+</script>
+
+<style>
+  .demo {
+    position: relative;
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    width: min(300px, 100%);
+    justify-self: center;
+  }
+
+  .demo__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .demo__rec {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff5c7a;
+    box-shadow: 0 0 10px #ff5c7a;
+    animation: rec 1.4s ease-in-out infinite;
+  }
+
+  @keyframes rec {
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  .demo__screen {
+    position: relative;
+    height: 500px;
+  }
+
+  .demo__screen .sim {
+    position: absolute;
+    inset: 0;
+  }
+
+  .demo__caption {
+    min-height: 44px;
+    display: grid;
+    place-items: center;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgb(0 0 0 / 0.4);
+    border: 1px solid rgb(255 188 0 / 0.45);
+    font-weight: 800;
+    text-align: center;
+  }
+
+  .demo__caption:empty::before {
+    content: '· · ·';
+    color: var(--text-dim);
+  }
+</style>

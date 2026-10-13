@@ -1,6 +1,6 @@
 # TEC Discord Guide — Project Plan
 
-> Status: **v3** — prototype built (homepage + Misi 05 Lapor Hasil). Items marked **[OPEN]** need a decision before they are built.
+> Status: **v4** — all 8 missions built; homepage leads with the interactive-guide explanation and mission map. Items marked **[OPEN]** need a decision before they are built.
 
 ## 1. Purpose
 
@@ -206,8 +206,8 @@ Kemenkeu logos — pushed toward a game-like, Astro-style "stipple gradient + fr
 
 1. ✅ Plan & server structure agreed
 2. ✅ Scaffold + design system + homepage
-3. ✅ Simulator engine + **Lapor Hasil** deck ← review this
-4. Remaining missions + channel map
+3. ✅ Simulator engine + **Lapor Hasil** deck
+4. ✅ Remaining missions (00–04, 06, 07) + homepage restructure ← review this
 5. Per-game cheat sheets (needs real in-game screenshots)
 6. Mobile QA, accessibility pass, deploy
 

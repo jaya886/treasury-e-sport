@@ -41,6 +41,8 @@ export function initDeck(root: HTMLElement) {
   const counter = root.querySelector<HTMLElement>('[data-counter]')!;
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // `?speed=4` plays scenes faster (handy for reviewing and automated checks).
+  const speed = Math.min(16, Math.max(0.5, Number(new URLSearchParams(location.search).get('speed')) || 1));
   const prefs = readPrefs();
   let device: Device = prefs.device ?? (window.matchMedia('(max-width: 900px)').matches ? 'mobile' : 'desktop');
   let mode: Mode = prefs.mode ?? 'watch';
@@ -94,7 +96,7 @@ export function initDeck(root: HTMLElement) {
     const c: RunControl = {
       cancelled: false,
       paused: !playing,
-      speed: 1,
+      speed,
       mode,
       labels: { tapHere: data.labels.tapHere, skip: data.labels.skip },
       onProgress: (f) => setSegProgress(index, f),
@@ -110,7 +112,7 @@ export function initDeck(root: HTMLElement) {
       sim.load(slide.scene.setup);
       await sim.run(slide.scene.steps, c);
     } else {
-      await timer(slide.duration, c);
+      await timer(slide.duration / speed, c);
     }
     if (c.cancelled) return;
     setSegProgress(index, 1);

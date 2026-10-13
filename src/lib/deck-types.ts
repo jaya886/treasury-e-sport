@@ -4,8 +4,14 @@ export type Visual =
   | { kind: 'sim'; scene: SimScene }
   | { kind: 'flow'; steps: { icon: string; label: string }[] }
   | { kind: 'shot' }
-  | { kind: 'deadline'; zones: { zone: string; time: string }[]; label: string }
-  | { kind: 'recap'; template: string };
+  | { kind: 'zones'; label: string; chip: string; zones: { zone: string; time: string }[]; note: string }
+  | { kind: 'cards'; cards: { icon: string; title: string; text: string }[] }
+  /** server → category → channel → thread hierarchy */
+  | { kind: 'concept'; levels: { icon: string; name: string; label: string }[] }
+  | { kind: 'form'; title: string; fields: { label: string; value: string }[]; button: string }
+  /** a message the participant receives (email or chat) */
+  | { kind: 'note'; app: string; from: string; title: string; body: string; button?: string }
+  | { kind: 'recap'; template?: string };
 
 export interface Slide {
   id: string;

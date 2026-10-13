@@ -3,15 +3,17 @@
 // (the deck runtime toggles `.is-active` on the wrapper).
 import type { Visual } from '../lib/deck-types';
 import { resultShotMarkup } from '../lib/shot';
+import { md } from '../lib/md';
 import { useTranslations, type Locale } from '../i18n/ui';
 
 interface Props {
   visual: Exclude<Visual, { kind: 'sim' }>;
   locale: Locale;
   xp: number;
+  badge: string;
 }
 
-const { visual, locale, xp } = Astro.props;
+const { visual, locale, xp, badge } = Astro.props;
 const t = useTranslations(locale);
 ---
 
@@ -56,7 +58,7 @@ const t = useTranslations(locale);
 }
 
 {
-  visual.kind === 'deadline' && (
+  visual.kind === 'zones' && (
     <div class="v-deadline">
       <div class="v-deadline__clock" aria-hidden="true">
         <span class="v-deadline__hand v-deadline__hand--m" />
@@ -64,7 +66,7 @@ const t = useTranslations(locale);
       </div>
       <div class="v-deadline__ts">
         <span class="hud">{visual.label}</span>
-        <span class="v-deadline__chip">dalam 2 jam</span>
+        <span class="v-deadline__chip">{visual.chip}</span>
       </div>
       <div class="v-deadline__zones">
         {visual.zones.map((z, i) => (
@@ -74,7 +76,7 @@ const t = useTranslations(locale);
           </div>
         ))}
       </div>
-      <p class="v-deadline__note">Satu batas waktu, tampil sesuai jam di perangkatmu.</p>
+      <p class="v-deadline__note">{visual.note}</p>
     </div>
   )
 }
@@ -82,14 +84,20 @@ const t = useTranslations(locale);
 {
   visual.kind === 'recap' && (
     <div class="v-recap">
-      <div class="v-recap__card glass">
-        <div class="v-recap__head">
-          <span class="hud hud--yellow">Format laporan</span>
-          <button class="btn btn--ghost v-recap__copy" type="button" data-copy={visual.template} data-copied={t('copy.copied')}>
-            {t('copy.copy')}
-          </button>
+      {visual.template && (
+        <div class="v-recap__card glass">
+          <div class="v-recap__head">
+            <span class="hud hud--yellow">Format pesan</span>
+            <button class="btn btn--ghost v-recap__copy" type="button" data-copy={visual.template} data-copied={t('copy.copied')}>
+              {t('copy.copy')}
+            </button>
+          </div>
+          <pre class="v-recap__tpl">{visual.template}</pre>
         </div>
-        <pre class="v-recap__tpl">{visual.template}</pre>
+      )}
+      <div class="v-recap__badge glass hud-corners">
+        <span class="hud">{t('toast.badge')}</span>
+        <b>{badge}</b>
       </div>
       <div class="v-recap__reward">
         <div class="v-recap__medal" aria-hidden="true">★</div>
@@ -105,7 +113,378 @@ const t = useTranslations(locale);
   )
 }
 
+
+{
+  visual.kind === 'cards' && (
+    <div class:list={['v-cards', { 'v-cards--2': visual.cards.length === 4 || visual.cards.length === 2 }]}>
+      {visual.cards.map((c, i) => (
+        <div class="v-card glass" style={`--i:${i}`}>
+          <span class="v-card__icon">{c.icon}</span>
+          <b class="v-card__title" set:html={md(c.title)} />
+          <span class="v-card__text" set:html={md(c.text)} />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+{
+  visual.kind === 'concept' && (
+    <div class="v-concept">
+      {visual.levels.map((l, i) => (
+        <div class="v-concept__level" style={`--i:${i}`}>
+          <span class="v-concept__icon">{l.icon}</span>
+          <span class="v-concept__text">
+            <span class="hud hud--yellow">{l.label}</span>
+            <b>{l.name}</b>
+          </span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+{
+  visual.kind === 'form' && (
+    <div class="v-form">
+      <div class="v-form__box">
+        <div class="v-form__title">{visual.title}</div>
+        {visual.fields.map((f, i) => (
+          <label class="v-form__field" style={`--i:${i}`}>
+            <span>{f.label}</span>
+            <span class="v-form__input">
+              <span class="v-form__value">{f.value}</span>
+            </span>
+          </label>
+        ))}
+        <span class="v-form__btn" style={`--i:${visual.fields.length}`}>
+          {visual.button}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+{
+  visual.kind === 'note' && (
+    <div class="v-note">
+      <div class="v-note__app hud">{visual.app}</div>
+      <div class="v-note__card">
+        <div class="v-note__from">
+          <span class="v-note__avatar">{visual.from.slice(0, 1)}</span>
+          <div>
+            <b>{visual.from}</b>
+            <small>baru saja</small>
+          </div>
+        </div>
+        <div class="v-note__title">{visual.title}</div>
+        <p class="v-note__body" set:html={md(visual.body)} />
+        {visual.button && <span class="v-note__btn">{visual.button}</span>}
+      </div>
+    </div>
+  )
+}
+
 <style>
+
+  /* cards ----------------------------------------------------------------- */
+  .v-cards {
+    display: grid;
+    gap: 12px;
+    width: min(560px, 100%);
+    margin: auto;
+  }
+
+  .v-cards--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .v-card {
+    display: grid;
+    gap: 4px;
+    align-content: start;
+    padding: 16px 18px;
+  }
+
+  :global(.is-active) > .v-cards .v-card {
+    animation: flow-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(0.2s + var(--i) * 0.25s);
+  }
+
+  .v-card__icon {
+    font-size: 1.8rem;
+    line-height: 1.2;
+  }
+
+  .v-card__title {
+    font-size: 1.05rem;
+    font-weight: 900;
+    line-height: 1.25;
+  }
+
+  .v-card__text {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .v-card__text :global(code),
+  .v-card__title :global(code) {
+    white-space: normal;
+  }
+
+  /* concept --------------------------------------------------------------- */
+  .v-concept {
+    display: grid;
+    gap: 10px;
+    width: min(440px, 100%);
+    margin: auto;
+  }
+
+  .v-concept__level {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: calc(var(--i) * 34px);
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, rgb(0 97 175 / 0.45), rgb(0 97 175 / 0.1));
+    border: 1px solid rgb(47 140 255 / 0.45);
+    position: relative;
+  }
+
+  .v-concept__level + .v-concept__level::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: -34px;
+    width: 18px;
+    height: 58px;
+    border-left: 2px solid var(--blue-glow);
+    border-bottom: 2px solid var(--blue-glow);
+    border-bottom-left-radius: 10px;
+  }
+
+  :global(.is-active) > .v-concept .v-concept__level {
+    animation: flow-in 0.5s ease both;
+    animation-delay: calc(0.2s + var(--i) * 0.5s);
+  }
+
+  .v-concept__icon {
+    font-size: 1.6rem;
+  }
+
+  .v-concept__text {
+    display: grid;
+  }
+
+  .v-concept__text b {
+    font-size: 1.05rem;
+  }
+
+  /* form ------------------------------------------------------------------ */
+  .v-form {
+    width: min(380px, 100%);
+    margin: auto;
+  }
+
+  .v-form__box {
+    display: grid;
+    gap: 10px;
+    padding: 22px;
+    border-radius: 12px;
+    background: #313338;
+    color: #dbdee1;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08), 0 30px 60px -20px #000;
+  }
+
+  .v-form__title {
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #f2f3f5;
+    margin-bottom: 4px;
+  }
+
+  .v-form__field {
+    display: grid;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #b5bac1;
+  }
+
+  .v-form__input {
+    display: block;
+    height: 38px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    background: #1e1f22;
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #f2f3f5;
+    overflow: hidden;
+  }
+
+  .v-form__value {
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    vertical-align: top;
+  }
+
+  :global(.is-active) > .v-form .v-form__value {
+    animation: type-in 0.9s steps(18) both;
+    animation-delay: calc(0.4s + var(--i) * 1s);
+  }
+
+  :global(.is-active) > .v-form .v-form__field {
+    animation: field-focus 1s ease both;
+    animation-delay: calc(0.4s + var(--i) * 1s);
+  }
+
+  .v-form__btn {
+    display: grid;
+    place-items: center;
+    height: 42px;
+    margin-top: 6px;
+    border-radius: 4px;
+    background: #5865f2;
+    color: #fff;
+    font-weight: 700;
+  }
+
+  :global(.is-active) > .v-form .v-form__btn {
+    animation: btn-press 0.5s ease both;
+    animation-delay: calc(0.6s + var(--i) * 1s);
+  }
+
+  @keyframes type-in {
+    from {
+      max-width: 0;
+    }
+    to {
+      max-width: 100%;
+    }
+  }
+
+  @keyframes field-focus {
+    0%,
+    100% {
+      color: #b5bac1;
+    }
+    30% {
+      color: var(--yellow);
+    }
+  }
+
+  @keyframes btn-press {
+    50% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 6px rgb(255 188 0 / 0.6);
+    }
+  }
+
+  /* note (email / chat message) ------------------------------------------ */
+  .v-note {
+    display: grid;
+    gap: 10px;
+    width: min(420px, 100%);
+    margin: auto;
+  }
+
+  .v-note__card {
+    display: grid;
+    gap: 10px;
+    padding: 18px 20px;
+    border-radius: 14px;
+    background: #f4f6fb;
+    color: #1d2333;
+    box-shadow: 0 30px 60px -20px #000;
+  }
+
+  :global(.is-active) > .v-note .v-note__card {
+    animation: flow-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .v-note__from {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .v-note__from small {
+    display: block;
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
+
+  .v-note__avatar {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--blue);
+    color: #fff;
+    font-weight: 800;
+  }
+
+  .v-note__title {
+    font-weight: 800;
+    font-size: 1.05rem;
+  }
+
+  .v-note__body {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .v-note__body :global(code) {
+    background: #e3e8f4;
+    border-color: #cfd6e6;
+    color: #0061af;
+    white-space: normal;
+  }
+
+  .v-note__btn {
+    justify-self: start;
+    padding: 8px 18px;
+    border-radius: 6px;
+    background: #5865f2;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  :global(.is-active) > .v-note .v-note__btn {
+    animation: btn-press 0.6s ease 1.6s both;
+  }
+
+  /* recap badge ----------------------------------------------------------- */
+  .v-recap__badge {
+    display: grid;
+    gap: 2px;
+    padding: 14px 18px;
+  }
+
+  .v-recap__badge b {
+    font-size: 1.3rem;
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 520px) {
+    .v-cards--2 {
+      grid-template-columns: 1fr;
+    }
+  }
+
   /* flow ------------------------------------------------------------------ */
   .v-flow {
     position: relative;
