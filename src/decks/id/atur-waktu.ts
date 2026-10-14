@@ -1,7 +1,7 @@
 import type { Deck } from '../../lib/deck-types';
 import { inThread, post } from './fixtures';
 
-const fresh = () => post({ replies: [], tags: ['MLBB', 'Terjadwal'] });
+const fresh = () => post({ replies: [], tags: ['MLBB', 'SCHEDULED'] });
 
 const PROPOSAL = 'Halo Laskar Maluku! 👋 Kami usul main Sabtu 19.30 WITA (18.30 WIB / 20.30 WIT). Bisa?';
 
@@ -51,7 +51,7 @@ export const aturWaktu: Deck = {
       visual: {
         kind: 'sim',
         scene: {
-          setup: inThread(post({ replies: [{ id: 'u-1', author: 'budi', time: 'Hari ini 09.20', text: PROPOSAL }], tags: ['MLBB', 'Terjadwal'] })),
+          setup: inThread(post({ replies: [{ id: 'u-1', author: 'budi', time: 'Hari ini 09.20', text: PROPOSAL }], tags: ['MLBB', 'SCHEDULED'] })),
           steps: [
             { wait: 500 },
             { online: 'raka' },
@@ -76,7 +76,7 @@ export const aturWaktu: Deck = {
       visual: {
         kind: 'sim',
         scene: {
-          setup: inThread(post({ replies: [{ id: 'u-1', author: 'budi', time: 'Kemarin 09.20', text: PROPOSAL }], tags: ['MLBB', 'Terjadwal'] })),
+          setup: inThread(post({ replies: [{ id: 'u-1', author: 'budi', time: 'Kemarin 09.20', text: PROPOSAL }], tags: ['MLBB', 'SCHEDULED'] })),
           steps: [
             { wait: 400 },
             { say: 'Belum ada jawaban sejak kemarin…' },

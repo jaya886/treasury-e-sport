@@ -24,7 +24,7 @@ export function post(overrides: Partial<SimPost> = {}): SimPost {
   return {
     id: 'r1',
     title: '[MLBB] R1 · Elang Sulsel vs Laskar Maluku',
-    tags: ['MLBB', 'Menunggu Laporan'],
+    tags: ['MLBB', 'PENDING RESULTS'],
     author: 'sari',
     time: 'Kemarin 09.00',
     text: [

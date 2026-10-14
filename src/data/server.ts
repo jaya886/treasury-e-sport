@@ -63,15 +63,17 @@ export const server: SimServer = {
     dewi: { id: 'dewi', name: 'Dewi | Kanwil DJPb Sulsel', color: '#3ddc97', online: true },
   },
   tags: {
-    MLBB: { emoji: '🎮', tone: 'neutral' },
-    'Dota 2': { emoji: '🎮', tone: 'neutral' },
-    Catur: { emoji: '♟️', tone: 'neutral' },
-    MCGG: { emoji: '🎮', tone: 'neutral' },
-    Terjadwal: { emoji: '🔵', tone: 'blue' },
-    'Menunggu Laporan': { emoji: '🟡', tone: 'yellow' },
-    Selesai: { emoji: '🟢', tone: 'green' },
-    Sengketa: { emoji: '🔴', tone: 'red' },
-    WO: { emoji: '⚪', tone: 'grey' },
+    // Same tags (and order) as the real #tec-2026 forum.
+    MLBB: { emoji: '', tone: 'neutral' },
+    PUBGM: { emoji: '', tone: 'neutral' },
+    MCGG: { emoji: '', tone: 'neutral' },
+    DOTA2: { emoji: '', tone: 'neutral' },
+    CATUR: { emoji: '', tone: 'neutral' },
+    FC27: { emoji: '', tone: 'neutral' },
+    SCHEDULED: { emoji: '⏰', tone: 'blue' },
+    'PENDING RESULTS': { emoji: '🟡', tone: 'yellow' },
+    FINISHED: { emoji: '🟢', tone: 'green' },
+    DISPUTED: { emoji: '🔴', tone: 'red' },
   },
   channels: {
     pengumuman: [
@@ -107,10 +109,10 @@ export const server: SimServer = {
     ],
   },
   forumPosts: [
-    otherPost('f-2', '[MLBB] R1 · Garuda Perben vs Rajawali Papua', ['MLBB', 'Selesai'], 6),
-    otherPost('f-3', '[Dota 2] R1 · Ancient Defenders vs KPPN Five', ['Dota 2', 'Terjadwal'], 3),
-    otherPost('f-4', '[Catur] R1 · Dewi vs Andi', ['Catur', 'Menunggu Laporan'], 4),
-    otherPost('f-5', '[MCGG] R1 · Hendra vs Yusuf', ['MCGG', 'Terjadwal'], 1),
-    otherPost('f-6', '[MLBB] R1 · Anoa Squad vs Cendrawasih', ['MLBB', 'Terjadwal'], 2),
+    otherPost('f-2', '[MLBB] R1 · Garuda Perben vs Rajawali Papua', ['MLBB', 'FINISHED'], 6),
+    otherPost('f-3', '[DOTA2] R1 · Ancient Defenders vs KPPN Five', ['DOTA2', 'SCHEDULED'], 3),
+    otherPost('f-4', '[CATUR] R1 · Dewi vs Andi', ['CATUR', 'PENDING RESULTS'], 4),
+    otherPost('f-5', '[MCGG] R1 · Hendra vs Yusuf', ['MCGG', 'SCHEDULED'], 1),
+    otherPost('f-6', '[MLBB] R1 · Anoa Squad vs Cendrawasih', ['MLBB', 'SCHEDULED'], 2),
   ],
 };

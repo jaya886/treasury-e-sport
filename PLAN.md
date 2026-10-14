@@ -73,9 +73,10 @@ visible to participants, so the guide does not show it.
 - **One forum post = one match thread**, created by PIC/Admin only.
 - **Public**: everyone can read every match (transparency).
 - Permissions: `@everyone` → *Send Messages in Posts* ✅, *Create Posts* ❌; `PIC TEC 2026` & `Admin` → *Create Posts*, *Manage Threads*.
-- **Tags** (forum supports up to 20; max 5 per post):
-  - Game: `MLBB` · `PUBGM` · `MCGG` · `Dota 2` · `Catur` · `FC 27`
-  - Status (moderator-only): `Terjadwal` · `Menunggu Laporan` · `Selesai` · `Sengketa` · `WO`
+- **Tags** (as set up on the real forum, in this order):
+  - Game: `MLBB` · `PUBGM` · `MCGG` · `DOTA2` · `CATUR` · `FC27`
+  - Status: `⏰ SCHEDULED` · `🟡 PENDING RESULTS` · `🟢 FINISHED` · `🔴 DISPUTED`
+  - No WO tag: a walkover is written in the thread by PIC and the match is tagged `FINISHED`.
 - **Pinned post** at the top: "📌 Mulai di sini — cara lapor & jadwal ronde" (links to this site).
 - Title convention: `[MLBB] R1 · Nama Tim A vs Nama Tim B` → searchable by team name.
 - PIC **@mentions** the players in the opening message → they are added to the thread automatically,

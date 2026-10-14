@@ -3,7 +3,7 @@ import { CHATTED, inThread, myReport, post } from './fixtures';
 
 const disputed = () =>
   post({
-    tags: ['MLBB', 'Sengketa'],
+    tags: ['MLBB', 'DISPUTED'],
     replies: [
       ...structuredClone(CHATTED),
       myReport,
@@ -17,7 +17,7 @@ const disputed = () =>
         id: 's-2',
         author: 'sari',
         time: 'Hari ini 20.22',
-        text: 'Laga ini masuk **Sengketa**. <@budi> <@raka> mohon kirim bukti lengkap di thread ini.',
+        text: 'Hasil laga ini **disengketakan**. <@budi> <@raka> mohon kirim bukti lengkap di thread ini.',
       },
     ],
   });
@@ -33,10 +33,10 @@ export const sengketaWo: Deck = {
         kind: 'flow',
         steps: [
           { icon: '❌', label: 'Lawan tidak setuju' },
-          { icon: '🔴', label: 'PIC: status Sengketa' },
+          { icon: '🔴', label: 'PIC: label DISPUTED' },
           { icon: '📎', label: 'Kedua pihak kirim bukti' },
           { icon: '⚖️', label: 'PIC memutuskan' },
-          { icon: '🟢', label: 'Hasil final' },
+          { icon: '🟢', label: 'Hasil final: FINISHED' },
         ],
       },
       duration: 9000,
@@ -44,7 +44,7 @@ export const sengketaWo: Deck = {
     {
       id: 'bukti',
       title: 'Kirim bukti di thread',
-      body: 'Saat status **🔴 Sengketa**, kirim bukti selengkap mungkin **di thread laga**. PIC memutuskan berdasarkan bukti yang ada di thread.',
+      body: 'Saat label laga **🔴 DISPUTED**, kirim bukti selengkap mungkin **di thread laga**. PIC memutuskan berdasarkan bukti yang ada di thread.',
       visual: {
         kind: 'sim',
         scene: {
@@ -68,10 +68,10 @@ export const sengketaWo: Deck = {
                 id: 's-3',
                 author: 'sari',
                 time: 'Hari ini 20.40',
-                text: 'Keputusan PIC: sesuai Match ID, **Elang Sulsel menang 2 - 1**. Status diubah ke Selesai.',
+                text: 'Keputusan PIC: sesuai Match ID, **Elang Sulsel menang 2 - 1**. Label diubah ke FINISHED.',
               },
             },
-            { tags: { post: 'r1', tags: ['MLBB', 'Selesai'] } },
+            { tags: { post: 'r1', tags: ['MLBB', 'FINISHED'] } },
             { say: 'Keputusan PIC bersifat final.' },
             { wait: 2000 },
           ],
@@ -102,7 +102,7 @@ export const sengketaWo: Deck = {
         cards: [
           { icon: '🚫', title: 'Tidak hadir', text: 'Satu tim tidak muncul pada jam yang sudah disepakati.' },
           { icon: '⏰', title: 'Tidak ada laporan', text: 'Lewat batas lapor dan hasil tidak bisa dicek PIC: **kedua pihak WO**.' },
-          { icon: '⚪', title: 'Status WO', text: 'PIC memberi label ⚪ WO pada laga tersebut.' },
+          { icon: '📝', title: 'Dicatat PIC', text: 'PIC menuliskan hasil WO di thread laga, lalu memberi label 🟢 FINISHED.' },
         ],
       },
       duration: 10000,

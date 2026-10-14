@@ -1724,6 +1724,10 @@
   align-items: center;
   gap: 6px;
   color: var(--dc-muted);
+  flex-wrap: nowrap;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, #000 88%, transparent);
 }
 
 .dc-forum__chips .i {
@@ -1732,6 +1736,8 @@
 }
 
 .dc-chip {
+  flex: none;
+  white-space: nowrap;
   padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid #4e5058;
@@ -1975,4 +1981,9 @@
 .dc-nick__preview small {
   color: var(--dc-muted);
   font-size: 12px;
+}
+
+.dc-chip--sort {
+  border-radius: 8px;
+  color: var(--dc-muted);
 }

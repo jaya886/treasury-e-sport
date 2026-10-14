@@ -414,9 +414,11 @@ export class DiscordSim {
 
   private forumBodyHTML() {
     const st = this.state;
-    const tags = ['MLBB', 'Dota 2', 'Catur', 'MCGG'];
-    const chips = tags
-      .map((t) => `<span class="dc-chip${st.filter === t ? ' is-on' : ''}" data-t="filter:${t}">${esc(t)}</span>`)
+    const chips = Object.entries(this.server.tags)
+      .map(
+        ([t, def]) =>
+          `<span class="dc-chip${st.filter === t ? ' is-on' : ''}" data-t="filter:${esc(t)}">${def.emoji ? `${def.emoji} ` : ''}${esc(t)}</span>`,
+      )
       .join('');
     const cards = this.forumList()
       .map(
@@ -432,10 +434,10 @@ export class DiscordSim {
       <div class="dc-forum">
         <div class="dc-forum__bar">
           <div class="dc-search" data-t="search">${icon('search')}${
-            st.search ? `<span class="dc-input__text">${esc(st.search)}</span><span class="dc-caret"></span>` : '<span class="dc-input__ph">Cari postingan…</span>'
+            st.search ? `<span class="dc-input__text">${esc(st.search)}</span><span class="dc-caret"></span>` : '<span class="dc-input__ph">Search or create a post...</span>'
           }</div>
         </div>
-        <div class="dc-forum__chips">${icon('tag')}${chips}</div>
+        <div class="dc-forum__chips"><span class="dc-chip dc-chip--sort">⇅ Sort &amp; View ⌄</span>${chips}</div>
         <div class="dc-forum__list">${cards || '<p class="dc-empty">Tidak ada postingan yang cocok.</p>'}</div>
       </div>`;
   }

@@ -1,7 +1,7 @@
 import type { Deck } from '../../lib/deck-types';
 import { atHome, inThread, post } from './fixtures';
 
-const fresh = () => post({ replies: [], tags: ['MLBB', 'Terjadwal'] });
+const fresh = () => post({ replies: [], tags: ['MLBB', 'SCHEDULED'] });
 
 export const cariJadwal: Deck = {
   slug: 'cari-jadwal',

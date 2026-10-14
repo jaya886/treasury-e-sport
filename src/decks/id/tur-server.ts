@@ -81,7 +81,13 @@ export const turServer: Deck = {
       id: 'forum',
       title: '#tec-2026: tempat laga & lapor hasil',
       body: 'Channel ini berbentuk **forum**. Setiap kartu adalah satu laga, lengkap dengan label game dan status. Di thread laga itulah kamu **mengatur jadwal dan melapor hasil**.',
-      bullets: ['🔵 Terjadwal', '🟡 Menunggu Laporan', '🟢 Selesai', '🔴 Sengketa', '⚪ WO'],
+      bullets: [
+        'Label game: **MLBB, PUBGM, MCGG, DOTA2, CATUR, FC27**.',
+        '⏰ **SCHEDULED**: laga sudah dijadwalkan.',
+        '🟡 **PENDING RESULTS**: menunggu laporan hasil.',
+        '🟢 **FINISHED**: hasil sudah dicatat PIC.',
+        '🔴 **DISPUTED**: hasil disengketakan, menunggu keputusan PIC.',
+      ],
       visual: {
         kind: 'sim',
         scene: {

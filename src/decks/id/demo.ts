@@ -23,7 +23,7 @@ export const heroDemo: SimScene = {
     { online: 'raka' },
     { typing: 'raka', ms: 1100 },
     { react: { msg: 'rep-1', emoji: '✅', by: 'raka' } },
-    { tags: { post: 'r1', tags: ['MLBB', 'Selesai'] } },
+    { tags: { post: 'r1', tags: ['MLBB', 'FINISHED'] } },
     { say: 'Laga selesai · +100 XP 🏆' },
     { wait: 2600 },
   ],

@@ -117,7 +117,7 @@ export const laporHasil: Deck = {
     {
       id: 'konfirmasi',
       title: 'Lawan mengonfirmasi',
-      body: 'Lawan cukup memberi reaksi **✅** pada laporanmu, atau membalas "Setuju". Setelah itu **PIC** mencatat hasil dan mengubah status laga menjadi **🟢 Selesai**.',
+      body: 'Lawan cukup memberi reaksi **✅** pada laporanmu, atau membalas "Setuju". Setelah itu **PIC** mencatat hasil dan mengubah label laga menjadi **🟢 FINISHED**.',
       tips: [
         {
           label: 'Cara lain yang juga sah',
@@ -143,11 +143,11 @@ export const laporHasil: Deck = {
                 id: 'k-2',
                 author: 'sari',
                 time: 'Hari ini 20.20',
-                text: 'Hasil dicatat: **Elang Sulsel 2 - 1 Laskar Maluku**. Status diubah ke Selesai. Terima kasih! 🏆',
+                text: 'Hasil dicatat: **Elang Sulsel 2 - 1 Laskar Maluku**. Label diubah ke FINISHED. Terima kasih! 🏆',
               },
             },
-            { tags: { post: 'r1', tags: ['MLBB', 'Selesai'] } },
-            { say: 'Laga resmi tercatat. 🟢 Selesai' },
+            { tags: { post: 'r1', tags: ['MLBB', 'FINISHED'] } },
+            { say: 'Laga resmi tercatat. 🟢 FINISHED' },
             { wait: 2000 },
           ],
         },
@@ -156,7 +156,7 @@ export const laporHasil: Deck = {
     {
       id: 'sengketa',
       title: 'Kalau lawan tidak setuju',
-      body: 'Jika ada perbedaan hasil, lawan membalas dengan ❌ dan buktinya. PIC mengubah status menjadi **🔴 Sengketa** lalu memutuskan.',
+      body: 'Jika ada perbedaan hasil, lawan membalas dengan ❌ dan buktinya. PIC mengubah label menjadi **🔴 DISPUTED** lalu memutuskan.',
       bullets: [
         'Bahas **di thread yang sama**, bukan lewat DM, supaya PIC bisa melihat semuanya.',
         'Kirim bukti selengkap mungkin: screenshot, Match ID, rekaman layar.',
@@ -178,17 +178,17 @@ export const laporHasil: Deck = {
                 text: '❌ Tidak setuju. Skor akhir 1 - 2 untuk kami, game ketiga dimenangkan Laskar Maluku.',
               },
             },
-            { say: 'Lawan tidak setuju → laga masuk Sengketa.' },
+            { say: 'Lawan tidak setuju → label menjadi DISPUTED.' },
             { typing: 'sari', ms: 1400 },
             {
               msg: {
                 id: 's-2',
                 author: 'sari',
                 time: 'Hari ini 20.22',
-                text: 'Laga ini masuk **Sengketa**. <@budi> <@raka> mohon kirim bukti lengkap di thread ini. PIC akan memutuskan.',
+                text: 'Hasil laga ini **disengketakan**. <@budi> <@raka> mohon kirim bukti lengkap di thread ini. PIC akan memutuskan.',
               },
             },
-            { tags: { post: 'r1', tags: ['MLBB', 'Sengketa'] } },
+            { tags: { post: 'r1', tags: ['MLBB', 'DISPUTED'] } },
             { say: 'Selesaikan di thread ini, bukan lewat DM.' },
             { wait: 2200 },
           ],
