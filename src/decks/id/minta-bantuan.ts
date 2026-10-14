@@ -48,7 +48,7 @@ export const mintaBantuan: Deck = {
                 id: 'h-1',
                 author: 'admin',
                 time: 'Hari ini 09.40',
-                text: 'Halo <@budi>, thread Ronde 2 sudah dibuat. Silakan cek lagi di <#tec-competition> ya 🙏',
+                text: 'Halo <@budi>, thread Ronde 2 sudah dibuat. Silakan cek lagi di <#tec-2026> ya 🙏',
               },
             },
             { react: { msg: 'h-1', emoji: '🙏', by: 'budi' } },

@@ -17,7 +17,7 @@ const otherPost = (id: string, title: string, tags: string[], replies: number): 
 export const server: SimServer = {
   name: 'Treasury E-Sport Community',
   me: 'budi',
-  forum: 'tec-competition',
+  forum: 'tec-2026',
   stats: { online: 48, members: 212 },
   categories: [
     {
@@ -25,8 +25,8 @@ export const server: SimServer = {
       emoji: '📣',
       channels: [
         { id: 'rules', name: 'rules', emoji: '📝', kind: 'rules', topic: 'Peraturan server' },
-        { id: 'pengumuman', name: 'pengumuman', emoji: '📣', kind: 'announce', topic: 'Info resmi panitia' },
-        { id: 'tec-competition', name: 'tec-competition', emoji: '🏅', kind: 'forum', topic: 'Thread semua laga TEC 2026' },
+        { id: 'pengumuman', name: 'pengumuman', emoji: '📣', kind: 'announce', topic: 'Pengumuman resmi & info kompetisi' },
+        { id: 'tec-2026', name: 'tec-2026', emoji: '🏅', kind: 'forum', topic: 'Thread laga & pelaporan hasil TEC 2026' },
         { id: 'support-dan-usulan', name: 'support-dan-usulan', emoji: '❓', kind: 'text', topic: 'Tanya panitia di sini' },
       ],
     },
@@ -47,14 +47,18 @@ export const server: SimServer = {
       emoji: '🌏',
       channels: [
         { id: 'general', name: 'general', kind: 'text' },
-        { id: 'mending-rakit-pc', name: 'mending-rakit-pc', kind: 'text', locked: true },
       ],
+    },
+    {
+      name: 'Voice Channels',
+      emoji: '🔊',
+      channels: [{ id: 'panggung-kdi', name: 'Panggung KDI', kind: 'stage' }],
     },
   ],
   users: {
     budi: { id: 'budi', name: 'Budi | KPPN Makassar I', color: '#2f8cff', online: true },
     raka: { id: 'raka', name: 'Raka | KPPN Ambon', color: '#e8590c' },
-    sari: { id: 'sari', name: 'Sari | PIC', color: '#ffbc00', role: 'PIC', roleColor: '#ffbc00', online: true },
+    sari: { id: 'sari', name: 'Sari | PIC', color: '#1abc9c', role: 'PIC TEC 2026', roleColor: '#1abc9c', online: true },
     admin: { id: 'admin', name: 'Admin TEC', color: '#9b5de5', role: 'Admin', roleColor: '#f0b232', online: true },
     dewi: { id: 'dewi', name: 'Dewi | Kanwil DJPb Sulsel', color: '#3ddc97', online: true },
   },
@@ -75,7 +79,13 @@ export const server: SimServer = {
         id: 'ann-1',
         author: 'admin',
         time: 'Hari ini 08.00',
-        text: '**Ronde 1 TEC 2026 dimulai!** 🎉\nThread laga setiap tim sudah dibuat di <#tec-competition>. Cek thread kalian, sepakati jam main, dan jangan lupa lapor hasil sebelum batas waktu.',
+        text: '**Ronde 1 TEC 2026 dimulai!** 🎉\nThread laga setiap tim sudah dibuat di <#tec-2026>. Cek thread kalian, sepakati jam main, dan jangan lupa lapor hasil sebelum batas waktu.',
+      },
+      {
+        id: 'ann-2',
+        author: 'admin',
+        time: 'Hari ini 08.05',
+        text: '📅 **Jadwal Ronde 1**\nJendela main: [ts:Sabtu, 14 November 2026] s/d [ts:Minggu, 15 November 2026]\nJam main tiap laga disepakati di thread laga masing-masing di <#tec-2026>.',
       },
     ],
     rules: [
@@ -83,7 +93,7 @@ export const server: SimServer = {
         id: 'rule-1',
         author: 'admin',
         time: '01/10/2026',
-        text: '**📝 Peraturan Server**\n1. Saling menghormati. Tidak ada SARA, hinaan, atau spam.\n2. Gunakan nama panggilan `Nama | Satker`.\n3. Urusan laga dibahas di thread laga masing-masing di <#tec-competition>.\n4. Pertanyaan ke panitia lewat <#support-dan-usulan>.\n5. Keputusan PIC dan panitia bersifat final.',
+        text: '**📝 Peraturan Server**\n1. Saling menghormati. Tidak ada SARA, hinaan, atau spam.\n2. Disarankan memakai nama panggilan sesuai nama asli/instansi, contoh `Budi | KPPN Makassar I`.\n3. Urusan laga dibahas di thread laga masing-masing di <#tec-2026>.\n4. Pertanyaan ke panitia lewat <#support-dan-usulan>.\n5. Keputusan PIC dan panitia bersifat final.',
       },
     ],
     'support-dan-usulan': [

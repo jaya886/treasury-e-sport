@@ -18,7 +18,7 @@ export const kenalanDiscord: Deck = {
         levels: [
           { icon: '🏠', label: 'Server', name: 'Treasury E-Sport Community' },
           { icon: '📁', label: 'Kategori', name: 'Informasi' },
-          { icon: '💬', label: 'Channel', name: '#🏅tec-competition' },
+          { icon: '💬', label: 'Channel', name: '#🏅tec-2026' },
           { icon: '🧵', label: 'Thread', name: '[MLBB] R1 · Elang Sulsel vs Laskar Maluku' },
         ],
       },

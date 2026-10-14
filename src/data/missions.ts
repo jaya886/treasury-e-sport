@@ -30,7 +30,7 @@ export const missions: Record<Locale, Mission[]> = {
       slug: 'masuk-server',
       no: 1,
       title: 'Masuk Server TEC',
-      blurb: 'Gabung lewat tautan dari formulir pendaftaran, lalu atur nama panggilan.',
+      blurb: 'Gabung lewat tautan dari formulir pendaftaran dan baca peraturan.',
       minutes: 2,
       xp: 100,
       badge: 'Warga TEC',

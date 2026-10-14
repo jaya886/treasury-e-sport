@@ -48,7 +48,7 @@ on-ramp: get Treasury employees into Discord and comfortable there.
 **Channels**
 
 - `#admin-only` (private) — thread "List Kerjoan…"
-- **Informasi**: `#rules`, `#pengumuman` (announcement), `#tec-competition`, `#support-dan-usulan`
+- **Informasi**: `#rules`, `#pengumuman` (announcement), `#tec-2026`, `#support-dan-usulan`
 - **yang kita mainkan**: `#mlbb`, `#literally-catur`, `#magic-chess-go-go`, `#dota2`, `#pubgm`, `#bola`
 - **Topik Umum - General**: `#vvip`🔒, `#general`, `#rampage`🔒, `#tec-juga-olah-raga`🔒, `#mending-rakit-pc`🔒
 - Community features on: Server Guide, Events, Channels & Roles.
@@ -64,14 +64,15 @@ bots: Dyno, Tatsu.
 
 ## 3. Competition setup on Discord (agreed)
 
-### 3.1 `#tec-competition` becomes a single **Forum channel** — the home of every match thread
+### 3.1 `#tec-2026` becomes a single **Forum channel** — the home of every match thread
 
-Discord cannot convert a text channel into a forum, so `#tec-competition` (currently empty) is
-deleted and re-created as a Forum channel with the same name, under **Informasi**.
+Done on the server: `#🏅tec-2026` is a Forum channel under **Informasi** (the old `#tec-competition`
+text channel was replaced). `#🏅pic-tec` is a private working channel for panitia/PIC and is not
+visible to participants, so the guide does not show it.
 
 - **One forum post = one match thread**, created by PIC/Admin only.
 - **Public**: everyone can read every match (transparency).
-- Permissions: `@everyone` → *Send Messages in Posts* ✅, *Create Posts* ❌; `PIC` & `Admin` → *Create Posts*, *Manage Threads*.
+- Permissions: `@everyone` → *Send Messages in Posts* ✅, *Create Posts* ❌; `PIC TEC 2026` & `Admin` → *Create Posts*, *Manage Threads*.
 - **Tags** (forum supports up to 20; max 5 per post):
   - Game: `MLBB` · `PUBGM` · `MCGG` · `Dota 2` · `Catur` · `FC 27`
   - Status (moderator-only): `Terjadwal` · `Menunggu Laporan` · `Selesai` · `Sengketa` · `WO`
@@ -120,18 +121,19 @@ Match ID: 123456789        ← lichess link for chess
 
 | Purpose | Channel |
 |---|---|
-| General announcements | `#pengumuman` |
-| Help (public) | `#support-dan-usulan` |
-| Rules | `#rules` |
-| Match threads & schedule | `#tec-competition` (forum) |
+| All competition announcements (incl. round schedules) | `#📣pengumuman` |
+| Help (public) | `#❓support-dan-usulan` |
+| Rules | `#📝rules` |
+| Match threads, per-match schedule & result reporting | `#🏅tec-2026` (forum) |
+| Panitia/PIC workspace (private, not in guide) | `#🏅pic-tec` |
 
 ### 3.5 Roles & names
 
 - **No participant role** — everyone can reply in match threads.
-- **`PIC`** — one universal role for all game PICs.
+- **`PIC TEC 2026`** — one universal role for all game PICs.
 - Other game roles are placeholders for the future community; not used by the guide.
-- Teams choose their own names, and one office may have several teams → nicknames carry the office:
-  `Nama | Satker` (e.g. `Budi | KPPN Makassar I`, max 32 chars).
+- Server nickname is **optional**. The guide suggests real name/office, e.g. `Budi | KPPN Makassar I`
+  (max 32 chars), because teams choose their own names and one office may have several teams.
 
 ## 4. Site information architecture (Bahasa Indonesia)
 
@@ -144,7 +146,7 @@ supergraphic. Progress is saved in the browser.
 | 0 | `/misi/kenalan-discord` | Kenalan dengan Discord | What Discord is; install (HP/laptop); create & verify account |
 | 1 | `/misi/masuk-server` | Masuk Server | Invite link from the registration form, accept, rules, nickname format |
 | 2 | `/misi/tur-server` | Tur Server | Interactive channel map: tap a channel → what it is for |
-| 3 | `/misi/cari-jadwal` | Cari Jadwal Laga | Your match in the sidebar, `#tec-competition` tags & search, reading timestamps, notifications |
+| 3 | `/misi/cari-jadwal` | Cari Jadwal Laga | Your match in the sidebar, `#tec-2026` tags & search, reading timestamps, notifications |
 | 4 | `/misi/koordinasi` | Atur Waktu Main | Agree on a time with the opponent inside the match thread |
 | 5 | `/misi/lapor-hasil` | Lapor Hasil | Screenshot → template → upload → wait for the other side |
 | 6 | `/misi/sengketa-wo` | Sengketa & WO | What happens on disagreement / missed deadline |

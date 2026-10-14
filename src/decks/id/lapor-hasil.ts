@@ -9,7 +9,7 @@ export const laporHasil: Deck = {
     {
       id: 'alur',
       title: 'Lapor Hasil Laga',
-      body: 'Setelah laga selesai, **kedua pihak** bertanggung jawab melaporkan hasil di **thread laga** masing-masing, di dalam `#🏅tec-competition`. Begini alurnya:',
+      body: 'Setelah laga selesai, **kedua pihak** bertanggung jawab melaporkan hasil di **thread laga** masing-masing, di dalam `#🏅tec-2026`. Begini alurnya:',
       bullets: [
         'Ambil screenshot hasil laga.',
         'Kirim laporan di thread laga.',
@@ -46,16 +46,16 @@ export const laporHasil: Deck = {
     {
       id: 'buka-thread',
       title: 'Buka thread laga kamu',
-      body: 'Thread laga muncul di daftar channel, **di bawah** `#🏅tec-competition`. Tanda merah berarti PIC menyebut namamu di thread itu.',
-      tips: [{ label: 'Tidak muncul?', text: 'Buka `#🏅tec-competition` lalu cari nama timmu di kolom pencarian.' }],
+      body: 'Thread laga muncul di daftar channel, **di bawah** `#🏅tec-2026`. Tanda merah berarti PIC menyebut namamu di thread itu.',
+      tips: [{ label: 'Tidak muncul?', text: 'Buka `#🏅tec-2026` lalu cari nama timmu di kolom pencarian.' }],
       visual: {
         kind: 'sim',
         scene: {
           setup: { view: 'home', post: 'r1', posts: [post({ mention: true })] },
           steps: [
             { wait: 600 },
-            { say: 'Thread laga ada di bawah #tec-competition.' },
-            { highlight: 'ch:tec-competition', ms: 1300 },
+            { say: 'Thread laga ada di bawah #tec-2026.' },
+            { highlight: 'ch:tec-2026', ms: 1300 },
             { say: 'Tanda merah: PIC menyebut namamu.' },
             { tap: 'thread:r1', try: true, hint: 'Ketuk thread laga kamu' },
             { view: 'thread' },

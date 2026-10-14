@@ -59,13 +59,16 @@ const ICONS: Record<string, string> = {
   invite: '<circle cx="10" cy="9" r="4" /><path d="M3 20a7 7 0 0 1 14 0" /><path d="M19 8v6M16 11h6" />',
   check: '<path d="m5 12 5 5 9-10" />',
   tag: '<path d="M4 4h8l8 8-8 8-8-8V4Z" /><circle cx="8.5" cy="8.5" r="1.5" />',
+  stage: '<circle cx="12" cy="12" r="2.5" /><path d="M7.8 16.2a6 6 0 0 1 0-8.4M16.2 7.8a6 6 0 0 1 0 8.4M5 19a10 10 0 0 1 0-14M19 5a10 10 0 0 1 0 14" />',
 };
 
 const icon = (name: string, cls = '') =>
   `<svg class="i ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name] ?? ''}</svg>`;
 
 const channelIcon = (kind: string) =>
-  icon(kind === 'announce' ? 'announce' : kind === 'rules' ? 'rules' : kind === 'forum' ? 'forum' : 'hash');
+  icon(
+    kind === 'announce' ? 'announce' : kind === 'rules' ? 'rules' : kind === 'forum' ? 'forum' : kind === 'stage' ? 'stage' : 'hash',
+  );
 
 function initials(name: string) {
   const first = name.split('|')[0].trim();

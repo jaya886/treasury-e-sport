@@ -7,9 +7,34 @@ export const cariJadwal: Deck = {
   slug: 'cari-jadwal',
   slides: [
     {
+      id: 'dua-tempat',
+      title: 'Jadwal ada di dua tempat',
+      body: '**Jadwal ronde** diumumkan panitia di `#📣pengumuman`. **Detail laga kamu** (lawan, jendela main, batas lapor) ada di **thread laga** di `#🏅tec-2026`.',
+      bullets: ['`#📣pengumuman`: jadwal umum setiap ronde.', '`#🏅tec-2026`: satu thread untuk setiap laga.'],
+      visual: {
+        kind: 'sim',
+        scene: {
+          setup: atHome(fresh()),
+          steps: [
+            { wait: 400 },
+            { say: 'Jadwal ronde diumumkan di #pengumuman.' },
+            { tap: 'ch:pengumuman', try: true, hint: 'Ketuk #pengumuman' },
+            { view: 'channel', channel: 'pengumuman' },
+            { highlight: 'msg:ann-2', ms: 2600 },
+            { say: 'Detail laga kamu ada di thread di #tec-2026.' },
+            { tap: 'back', only: 'mobile' },
+            { view: 'home', only: 'mobile' },
+            { highlight: 'ch:tec-2026', ms: 2200 },
+            { say: '' },
+            { wait: 400 },
+          ],
+        },
+      },
+    },
+    {
       id: 'notifikasi',
       title: 'PIC akan memanggilmu',
-      body: 'Saat laga dibuat, PIC **menyebut namamu** (mention) di thread laga. Kamu otomatis bergabung ke thread itu, dan thread-nya muncul **di bawah** `#🏅tec-competition`.',
+      body: 'Saat laga dibuat, PIC **menyebut namamu** (mention) di thread laga. Kamu otomatis bergabung ke thread itu, dan thread-nya muncul **di bawah** `#🏅tec-2026`.',
       tips: [{ label: 'Tanda merah', text: 'Angka merah di samping thread artinya ada yang menyebut namamu di sana.' }],
       visual: {
         kind: 'sim',
@@ -20,7 +45,7 @@ export const cariJadwal: Deck = {
             { notify: { title: 'Sari | PIC menyebutmu', body: '[MLBB] R1 · Elang Sulsel vs Laskar Maluku' } },
             { say: 'Notifikasi: PIC menyebut namamu.' },
             { highlight: 'thread:r1', ms: 1800 },
-            { say: 'Thread laga kamu ada di bawah #tec-competition.' },
+            { say: 'Thread laga kamu ada di bawah #tec-2026.' },
             { tap: 'thread:r1', try: true, hint: 'Ketuk thread laga kamu' },
             { view: 'thread' },
             { say: 'Ini thread laga kamu.' },
@@ -32,15 +57,15 @@ export const cariJadwal: Deck = {
     {
       id: 'cari',
       title: 'Tidak ada di sidebar? Cari di forum',
-      body: 'Buka `#🏅tec-competition`, pilih **label game**, lalu ketik **nama timmu** di kolom pencarian.',
+      body: 'Buka `#🏅tec-2026`, pilih **label game**, lalu ketik **nama timmu** di kolom pencarian.',
       visual: {
         kind: 'sim',
         scene: {
           setup: atHome(fresh(), { posts: [{ ...fresh(), joined: false }] }),
           steps: [
             { wait: 400 },
-            { say: 'Buka #tec-competition.' },
-            { tap: 'ch:tec-competition', try: true, hint: 'Ketuk #tec-competition' },
+            { say: 'Buka #tec-2026.' },
+            { tap: 'ch:tec-2026', try: true, hint: 'Ketuk #tec-2026' },
             { view: 'forum' },
             { say: 'Pilih label game kamu.' },
             { tap: 'filter:MLBB', try: true, hint: 'Pilih label MLBB' },
@@ -124,7 +149,8 @@ export const cariJadwal: Deck = {
       title: 'Jadwal ketemu!',
       body: 'Kamu tahu cara menemukan laga dan membaca jadwalnya.',
       bullets: [
-        'Thread laga muncul di bawah `#🏅tec-competition`.',
+        'Jadwal ronde diumumkan di `#📣pengumuman`.',
+        'Thread laga muncul di bawah `#🏅tec-2026`.',
         'Kalau tidak muncul, cari di forum dengan label game dan nama tim.',
         'Jam di pesan PIC sudah sesuai zona waktumu.',
         'Tekan **Ikuti** agar dapat notifikasi.',

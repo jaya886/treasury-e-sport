@@ -42,7 +42,7 @@ export interface SimPost {
   replies: SimMessage[];
 }
 
-export type ChannelKind = 'text' | 'announce' | 'rules' | 'forum';
+export type ChannelKind = 'text' | 'announce' | 'rules' | 'forum' | 'stage';
 
 export interface SimChannel {
   id: string;
