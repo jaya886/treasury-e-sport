@@ -216,7 +216,8 @@ export class DiscordSim {
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/&lt;@(\w+)&gt;/g, (_, id) => `<span class="dc-mention${id === meId ? ' is-me' : ''}">@${esc(this.userName(id))}</span>`)
       .replace(/&lt;#([\w-]+)&gt;/g, (_, id) => `<span class="dc-mention">#${esc(id)}</span>`)
-      .replace(/\[ts:(.+?)\]/g, '<span class="dc-ts">$1</span>');
+      .replace(/\[ts:(.+?)\]/g, '<span class="dc-ts">$1</span>')
+      .replace(/https?:\/\/[^\s<]+/g, '<span class="dc-link">$&</span>');
   }
 
   private avatar(userId: string, size = 40) {

@@ -1,0 +1,82 @@
+{
+  "$comment": "Treasury E-Sport Community server layout for the TEC 2026 match-thread bot. Names are exact (emoji are part of channel names). IDs are unknown here: fill them via environment variables (see README §8.1). Resolve forum tag IDs at runtime by name.",
+  "guild": {
+    "name": "Treasury E-Sport Community",
+    "id_env": "GUILD_ID"
+  },
+  "channels": {
+    "forum": {
+      "name": "🏅tec-2026",
+      "type": "GUILD_FORUM",
+      "category": "Informasi",
+      "visibility": "everyone",
+      "id_env": "FORUM_CHANNEL_ID",
+      "purpose": "One post per match: schedule agreement and result reporting"
+    },
+    "log": {
+      "name": "🏅pic-tec",
+      "type": "GUILD_TEXT",
+      "category": "Informasi",
+      "visibility": "private: panitia/PIC only",
+      "id_env": "LOG_CHANNEL_ID",
+      "purpose": "Bot logs, errors, unresolved players, deadline alerts"
+    },
+    "announcements": {
+      "name": "📣pengumuman",
+      "type": "GUILD_ANNOUNCEMENT",
+      "category": "Informasi",
+      "purpose": "All competition announcements incl. round schedules (posted by panitia, not the bot)"
+    },
+    "rules": { "name": "📝rules", "category": "Informasi" },
+    "support": { "name": "❓support-dan-usulan", "type": "GUILD_TEXT", "category": "Informasi" }
+  },
+  "$comment_categories": "Full channel list for context only; emoji in non-bot channels are approximate. The bot only uses the channels listed under \"channels\".",
+  "categories": [
+    { "name": "Informasi", "channels": ["📝rules", "📣pengumuman", "🏅pic-tec", "🏅tec-2026", "❓support-dan-usulan"] },
+    { "name": "yang kita mainkan", "channels": ["🧙mlbb", "♟️literally-catur", "🪄magic-chess-go-go", "🏙️dota2", "🪖pubgm", "⚽bola"] },
+    { "name": "Topik Umum - General", "channels": ["👑vvip", "general", "rampage", "tec-juga-olah-raga", "mending-rakit-pc"] },
+    { "name": "Voice Channels", "channels": ["Panggung KDI"] }
+  ],
+  "roles": {
+    "pic": { "name": "PIC TEC 2026", "id_env": "PIC_ROLE_ID", "can_run_commands": true },
+    "admin": { "name": "Admin", "id_env": "ADMIN_ROLE_ID", "can_run_commands": true },
+    "captain": { "name": "Kapten Tim TEC", "note": "Exists, currently unused" },
+    "interest_roles": ["mlbb", "pubgm", "magic-chess", "valorant", "Dota2", "Catur", "Bola"],
+    "other_bots": ["Dyno", "Tatsu"]
+  },
+  "forum_tags": {
+    "game": ["MLBB", "PUBGM", "MCGG", "DOTA2", "CATUR", "FC27"],
+    "status": [
+      { "name": "SCHEDULED", "emoji": "⏰", "set_by": "bot on creation" },
+      { "name": "PENDING RESULTS", "emoji": "🟡", "set_by": "bot when window_end passes" },
+      { "name": "FINISHED", "emoji": "🟢", "set_by": "PIC" },
+      { "name": "DISPUTED", "emoji": "🔴", "set_by": "PIC" }
+    ],
+    "rules": "Exactly one game tag + one status tag per post. No WO tag exists: PIC writes the walkover in the thread and tags FINISHED."
+  },
+  "games": {
+    "MLBB": { "label": "Mobile Legends: Bang Bang", "sides": "team", "threads": true },
+    "DOTA2": { "label": "Dota 2", "sides": "team", "threads": true },
+    "MCGG": { "label": "Magic Chess: Go Go", "sides": "player", "threads": true },
+    "CATUR": { "label": "Catur (lichess.org)", "sides": "player", "threads": true, "match_id_hint": "lichess game link" },
+    "PUBGM": { "label": "PUBG Mobile", "sides": "multi-team lobby", "threads": "undecided" },
+    "FC27": { "label": "EA Sports FC 27", "sides": "player", "threads": "undecided (played offline)" }
+  },
+  "post_template": {
+    "title": "[{GAME}] {ROUND} · {SIDE_A} vs {SIDE_B}",
+    "body": [
+      "Peserta: {MENTIONS_A} ({SIDE_A}) vs {MENTIONS_B} ({SIDE_B})",
+      "Jendela main: <t:{START}:F> s/d <t:{END}:t>",
+      "Format: {FORMAT}",
+      "Batas lapor: <t:{DEADLINE}:R>",
+      "Cara lapor: {GUIDE_REPORT_URL}"
+    ],
+    "initial_tags": ["{GAME}", "SCHEDULED"],
+    "auto_archive_duration": 10080
+  },
+  "guide": {
+    "site": "https://jaya886.github.io/treasury-e-sport/",
+    "report_mission": "https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/",
+    "schedule_mission": "https://jaya886.github.io/treasury-e-sport/misi/cari-jadwal/"
+  }
+}

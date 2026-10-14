@@ -5,6 +5,9 @@ use the community Discord server: find their match schedule, coordinate with opp
 
 See [`PLAN.md`](PLAN.md) for scope, decisions and open questions.
 
+The spec for the Discord match-thread bot lives in [`docs/discord-bot/`](docs/discord-bot/README.md).
+Its post format is mirrored by the guide's simulator fixtures, so keep the two in sync.
+
 ## Develop
 
 ```sh

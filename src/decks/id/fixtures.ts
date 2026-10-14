@@ -19,7 +19,7 @@ export const CHATTED: SimMessage[] = [
   { id: 'c-2', author: 'budi', time: 'Kemarin 10.20', text: 'Siap, sampai ketemu di lobby!' },
 ];
 
-/** The participant's own match post. */
+/** The participant's own match post. Title and body mirror the bot spec: docs/discord-bot/README.md §4. */
 export function post(overrides: Partial<SimPost> = {}): SimPost {
   return {
     id: 'r1',
@@ -32,6 +32,7 @@ export function post(overrides: Partial<SimPost> = {}): SimPost {
       'Jendela main: [ts:Sabtu, 14 November 2026 19.00] s/d [ts:21.00]',
       'Format: Bo3',
       'Batas lapor: [ts:dalam 2 jam]',
+      'Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/',
     ].join('\n'),
     mention: false,
     replies: structuredClone(CHATTED),

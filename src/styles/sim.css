@@ -1987,3 +1987,8 @@
   border-radius: 8px;
   color: var(--dc-muted);
 }
+
+.dc-link {
+  color: var(--dc-link);
+  overflow-wrap: anywhere;
+}
