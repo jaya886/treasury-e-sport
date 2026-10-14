@@ -185,8 +185,31 @@ const t = useTranslations(locale);
   )
 }
 
-<style>
+{
+  visual.kind === 'formdone' && (
+    <div class="v-done">
+      <div class="v-done__app hud">{visual.app}</div>
+      <div class="v-done__page">
+        <div class="v-done__banner" />
+        <div class="v-done__body">
+          <div class="v-done__form">{visual.form}</div>
+          <div class="v-done__ok">
+            <span class="v-done__check">✓</span>
+            Tanggapan kamu sudah terkirim
+          </div>
+          <p class="v-done__msg" set:html={md(visual.message)} />
+          <span class="v-done__link">
+            🔗 {visual.link}
+            <span class="v-done__tap" aria-hidden="true" />
+          </span>
+          <span class="v-done__hint">{visual.linkLabel}</span>
+        </div>
+      </div>
+    </div>
+  )
+}
 
+<style>
   /* cards ----------------------------------------------------------------- */
   .v-cards {
     display: grid;
@@ -463,6 +486,130 @@ const t = useTranslations(locale);
 
   :global(.is-active) > .v-note .v-note__btn {
     animation: btn-press 0.6s ease 1.6s both;
+  }
+
+
+  /* form confirmation page ------------------------------------------------ */
+  .v-done {
+    display: grid;
+    gap: 10px;
+    width: min(440px, 100%);
+    margin: auto;
+  }
+
+  .v-done__page {
+    overflow: hidden;
+    border-radius: 12px;
+    background: #f4f6fb;
+    color: #1d2333;
+    box-shadow: 0 30px 60px -20px #000;
+  }
+
+  :global(.is-active) > .v-done .v-done__page {
+    animation: flow-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  .v-done__banner {
+    height: 56px;
+    background:
+      repeating-linear-gradient(90deg, rgb(255 255 255 / 0.18) 0 4px, transparent 4px 10px),
+      linear-gradient(90deg, #0061af, #2f8cff);
+  }
+
+  .v-done__body {
+    display: grid;
+    gap: 12px;
+    padding: 18px 22px 22px;
+  }
+
+  .v-done__form {
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+
+  .v-done__ok {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #107c41;
+  }
+
+  .v-done__check {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #107c41;
+    color: #fff;
+    font-size: 0.85rem;
+  }
+
+  :global(.is-active) > .v-done .v-done__check {
+    animation: callout-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s both;
+  }
+
+  .v-done__msg {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+
+  .v-done__link {
+    position: relative;
+    justify-self: start;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #e6efff;
+    border: 1px solid #b9cff5;
+    color: #0061af;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: underline;
+  }
+
+  :global(.is-active) > .v-done .v-done__link {
+    animation: btn-press 0.6s ease 2s both;
+  }
+
+  .v-done__tap {
+    position: absolute;
+    right: -10px;
+    bottom: -14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgb(255 188 0 / 0.5);
+    border: 2px solid #ffbc00;
+    opacity: 0;
+  }
+
+  :global(.is-active) > .v-done .v-done__tap {
+    animation: done-tap 1.2s ease 1.6s both;
+  }
+
+  @keyframes done-tap {
+    0% {
+      opacity: 0;
+      transform: translate(20px, 20px);
+    }
+    40%,
+    70% {
+      opacity: 1;
+      transform: none;
+    }
+    55% {
+      transform: scale(0.8);
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
+  .v-done__hint {
+    font-size: 0.8rem;
+    color: #6b7280;
   }
 
   /* recap badge ----------------------------------------------------------- */

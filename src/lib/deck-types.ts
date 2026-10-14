@@ -11,6 +11,8 @@ export type Visual =
   | { kind: 'form'; title: string; fields: { label: string; value: string }[]; button: string }
   /** a message the participant receives (email or chat) */
   | { kind: 'note'; app: string; from: string; title: string; body: string; button?: string }
+  /** confirmation page shown after submitting a registration form */
+  | { kind: 'formdone'; app: string; form: string; message: string; link: string; linkLabel: string }
   | { kind: 'recap'; template?: string };
 
 export interface Slide {

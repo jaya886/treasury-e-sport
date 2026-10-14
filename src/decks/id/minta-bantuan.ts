@@ -18,7 +18,7 @@ export const mintaBantuan: Deck = {
           { icon: '🧵', title: 'Urusan satu laga', text: 'Jadwal, lawan tidak merespons, sengketa: tulis **di thread laga** dan sebut PIC.' },
           { icon: '❓', title: 'Pertanyaan umum', text: 'Aturan, akun, thread belum muncul: tanya di `#support-dan-usulan`.' },
           { icon: '📣', title: 'Cek dulu', text: 'Mungkin jawabannya sudah ada di `#pengumuman`.' },
-          { icon: '🚪', title: 'Belum bisa masuk server?', text: 'Hubungi panitia lewat kontak yang mengirim undanganmu.' },
+          { icon: '🚪', title: 'Belum bisa masuk server?', text: 'Hubungi panitia TEC lewat kontak pendaftaran untuk meminta tautan undangan.' },
         ],
       },
       duration: 10000,

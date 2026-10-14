@@ -21,7 +21,7 @@ on-ramp: get Treasury employees into Discord and comfortable there.
 - Treasury (DJPb) employees only, from offices all over Indonesia (WIB / WITA / WIT).
 - Many have **never used Discord** (especially the chess community) → assume zero knowledge.
 - Participants have both phone and laptop → every walkthrough has an **HP / Laptop** toggle; layouts mobile-first.
-- Invites are sent **individually** by panitia (no permanent public link).
+- Discord invite: a **regular invite link** shown on the confirmation page after submitting the participant registration form (Microsoft Forms).
 
 ### Scope
 
@@ -142,7 +142,7 @@ supergraphic. Progress is saved in the browser.
 |---|---|---|---|
 | — | `/` | Beranda | What TEC is, why Discord, "Mulai Misi" + "Gabung Discord" |
 | 0 | `/misi/kenalan-discord` | Kenalan dengan Discord | What Discord is; install (HP/laptop); create & verify account |
-| 1 | `/misi/masuk-server` | Masuk Server | Open your personal invite (expires!), onboarding, nickname format |
+| 1 | `/misi/masuk-server` | Masuk Server | Invite link from the registration form, accept, rules, nickname format |
 | 2 | `/misi/tur-server` | Tur Server | Interactive channel map: tap a channel → what it is for |
 | 3 | `/misi/cari-jadwal` | Cari Jadwal Laga | Your match in the sidebar, `#tec-competition` tags & search, reading timestamps, notifications |
 | 4 | `/misi/koordinasi` | Atur Waktu Main | Agree on a time with the opponent inside the match thread |
