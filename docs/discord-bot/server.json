@@ -59,11 +59,12 @@
     "DOTA2": { "label": "Dota 2", "sides": "team", "threads": true },
     "MCGG": { "label": "Magic Chess: Go Go", "sides": "player", "threads": true },
     "CATUR": { "label": "Catur (lichess.org)", "sides": "player", "threads": true, "match_id_hint": "lichess game link" },
-    "PUBGM": { "label": "PUBG Mobile", "sides": "multi-team lobby", "threads": "undecided" },
-    "FC27": { "label": "EA Sports FC 27", "sides": "player", "threads": "undecided (played offline)" }
+    "PUBGM": { "label": "PUBG Mobile", "sides": "multi-team lobby", "threads": true, "note": "one post per lobby listing every squad" },
+    "FC27": { "label": "EA Sports FC 27", "sides": "player", "threads": true, "note": "played offline; listing matches is optional" }
   },
   "post_template": {
     "title": "[{GAME}] {ROUND} · {SIDE_A} vs {SIDE_B}",
+    "title_lobby": "[{GAME}] {ROUND} · {LABEL} · {SIDE_1}, {SIDE_2}, … +N",
     "body": [
       "Peserta: {MENTIONS_A} ({SIDE_A}) vs {MENTIONS_B} ({SIDE_B})",
       "Jendela main: <t:{START}:F> s/d <t:{END}:t>",
@@ -71,6 +72,8 @@
       "Batas lapor: <t:{DEADLINE}:R>",
       "Cara lapor: {GUIDE_REPORT_URL}"
     ],
+    "body_lobby_peserta": ["Peserta:", "1. {MENTIONS_1} ({SIDE_1})", "2. {MENTIONS_2} ({SIDE_2})", "…"],
+    "mentions_fallback": "If the message would exceed 2000 characters or 100 mentions: '<@CAPTAIN_ID> +N' per side, teammates added to the post without a ping",
     "initial_tags": ["{GAME}", "SCHEDULED"],
     "auto_archive_duration": 10080
   },

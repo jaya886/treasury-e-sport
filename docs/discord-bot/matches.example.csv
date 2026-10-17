@@ -1,5 +1,7 @@
-match_id,game,round,side_a_name,side_a_players,side_b_name,side_b_players,window_start,window_end,report_deadline,format,pic,notes
-MLBB-R1-01,MLBB,R1,Elang Sulsel,budi.makassar;andi_ppk;rina.kppn;fajar88;yogi.sulsel,Laskar Maluku,raka.ambon;nina_maluku;dimas.amb;ucok77;bayu.mlk,2026-11-14T19:00:00+08:00,2026-11-14T21:00:00+08:00,2026-11-14T23:00:00+08:00,Bo3,sari.pic,
-DOTA2-R1-01,DOTA2,R1,Ancient Defenders,hendra.dota;wawan_kppn;tari.d2;iwan99;gilang.dj,KPPN Five,yusuf.five;agus_kppn;rudi.d2;eko_dota;fikri.k5,2026-11-15T13:00:00+07:00,2026-11-15T17:00:00+07:00,2026-11-15T20:00:00+07:00,Bo3,sari.pic,
-CATUR-R1-01,CATUR,R1,Dewi,dewi.sulsel,Andi,andi.chess,2026-11-14T09:00:00+08:00,2026-11-14T12:00:00+08:00,2026-11-14T14:00:00+08:00,Bo1 · 10+5,sari.pic,Main di lichess.org
-MCGG-R1-01,MCGG,R1,Hendra,hendra.mcgg,Yusuf,yusuf.mc,2026-11-14T20:00:00+09:00,2026-11-14T22:00:00+09:00,2026-11-15T00:00:00+09:00,Bo1,,Offset WIT juga boleh
+match_id,game,round,label,sides,window_start,window_end,report_deadline,format,pic,notes
+MLBB-R1-01,MLBB,R1,,Elang Sulsel;Laskar Maluku,2026-11-14T19:00:00+08:00,2026-11-14T21:00:00+08:00,2026-11-14T23:00:00+08:00,Bo3,sari.pic,
+DOTA2-R1-01,DOTA2,R1,,Ancient Defenders;KPPN Five,2026-11-15T13:00:00+07:00,2026-11-15T17:00:00+07:00,2026-11-15T20:00:00+07:00,Bo3,sari.pic,
+CATUR-R1-01,CATUR,R1,,Dewi;Andi,2026-11-14T09:00:00+08:00,2026-11-14T12:00:00+08:00,2026-11-14T14:00:00+08:00,Bo1 · 10+5,sari.pic,Main di lichess.org
+MCGG-R1-01,MCGG,R1,,Hendra;Yusuf,2026-11-14T20:00:00+09:00,2026-11-14T22:00:00+09:00,2026-11-15T00:00:00+09:00,Bo1,,Offset WIT juga boleh
+FC27-R1-01,FC27,R1,,Rizky;Bima,2026-11-21T10:00:00+08:00,2026-11-21T12:00:00+08:00,2026-11-21T13:00:00+08:00,Bo1,sari.pic,Offline di aula
+PUBGM-R1-A,PUBGM,R1,Lobby A,Elang Sulsel;Laskar Maluku;KPPN Five;Ancient Defenders;Pinisi Squad;Toraja Raiders;Banda Hawks;Celebes Storm;Kendari Kings;Ternate Tigers;Palu Phoenix;Gorontalo Guard;Manado Marines;Sorong Sharks;Ambon Arrows;Bone Bravo,2026-11-22T19:00:00+08:00,2026-11-22T21:00:00+08:00,2026-11-22T23:00:00+08:00,3 match (Erangel · Miramar · Sanhok),sari.pic,
