@@ -84,7 +84,7 @@ export const turServer: Deck = {
       bullets: [
         'Label game: **MLBB, PUBGM, MCGG, DOTA2, CATUR, FC27**.',
         '⏰ **SCHEDULED**: laga sudah dijadwalkan.',
-        '🟡 **PENDING RESULTS**: menunggu laporan hasil.',
+        '🟡 **PENDING RESULTS**: jendela main sudah dimulai, menunggu laporan hasil.',
         '🟢 **FINISHED**: hasil sudah dicatat PIC.',
         '🔴 **DISPUTED**: hasil disengketakan, menunggu keputusan PIC.',
       ],

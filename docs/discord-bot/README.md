@@ -269,7 +269,7 @@ The registration form (Microsoft Forms) should collect each player's **Discord u
 ## 6. Status lifecycle
 
 ```
-SCHEDULED ──(window_end reached)──▶ PENDING RESULTS ──(PIC)──▶ FINISHED
+SCHEDULED ──(window_start reached)──▶ PENDING RESULTS ──(PIC)──▶ FINISHED
                                           │
                                           └──(PIC)──▶ DISPUTED ──(PIC)──▶ FINISHED
 ```
@@ -277,7 +277,7 @@ SCHEDULED ──(window_end reached)──▶ PENDING RESULTS ──(PIC)──�
 | Transition | Who | When |
 |---|---|---|
 | create → `SCHEDULED` | bot | On creation |
-| `SCHEDULED` → `PENDING RESULTS` | bot (phase 2) | When `window_end` passes |
+| `SCHEDULED` → `PENDING RESULTS` | bot (phase 2) | When `window_start` is reached (play begins) |
 | → `FINISHED` / `DISPUTED` | **PIC** (manually in Discord, or via `/tec status`) | After reviewing reports |
 
 Rules:
@@ -400,7 +400,7 @@ what they will actually see.
    in the round code and the committee makes the pairings. A bracket engine that tracks results and generates
    next rounds is planned as a later phase, after phase 2.
 6. **Reporting deadline rule:** fixed per round, or `window_end + N hours`?
-7. **Auto `PENDING RESULTS`:** at `window_end` (assumed) or at `window_start`? The bot does it at `window_end`; switching is a one-line change.
+7. ~~**Auto `PENDING RESULTS`**~~ Decided: at `window_start`, when play begins.
 8. **WO handling:** confirm there will be no WO tag (assumed: PIC writes it in the thread and tags `FINISHED`).
 
 ---
@@ -420,6 +420,6 @@ Test on a **separate test server** with the same channel/tag setup before touchi
 - [ ] Unresolved usernames appear as plain text, are reported, and become mentions on a later sync once the player joins.
 - [ ] A lobby of 3+ teams gives one post with a numbered team list; with ~20 squads of 4 only captains are pinged and every player still sees the post in their sidebar.
 - [ ] Changing a player in `teams.csv` and re-syncing updates every post of that team and adds the new player.
-- [ ] (Phase 2) Status moves to `PENDING RESULTS` after `window_end`; reminders fire once.
+- [ ] (Phase 2) Status moves to `PENDING RESULTS` at `window_start`; reminders fire once.
 - [ ] (Phase 2) Slash commands are refused for members without `PIC TEC 2026` or `Admin`.
 - [ ] The bot token is not in the repository.
