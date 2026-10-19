@@ -400,7 +400,7 @@ what they will actually see.
    in the round code and the committee makes the pairings. A bracket engine that tracks results and generates
    next rounds is planned as a later phase, after phase 2.
 6. **Reporting deadline rule:** fixed per round, or `window_end + N hours`?
-7. **Auto `PENDING RESULTS`:** at `window_end` (assumed) or at `window_start`?
+7. **Auto `PENDING RESULTS`:** at `window_end` (assumed) or at `window_start`? The bot does it at `window_end`; switching is a one-line change.
 8. **WO handling:** confirm there will be no WO tag (assumed: PIC writes it in the thread and tags `FINISHED`).
 
 ---
