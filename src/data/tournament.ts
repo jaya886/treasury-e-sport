@@ -1,11 +1,6 @@
 // Tournament facts shown on the homepage. Update here when the committee announces details.
 import type { Locale } from '../i18n/ui';
 
-export const tournament = {
-  /** total prize pool across all games, in rupiah */
-  prizePool: 7_800_000,
-};
-
 export const tournamentFacts: Record<Locale, { icon: string; label: string; value: string }[]> = {
   id: [
     { icon: '🎮', label: 'Cabang', value: 'MLBB · PUBGM · MCGG · Dota 2 · Catur · FC 27' },
@@ -14,7 +9,3 @@ export const tournamentFacts: Record<Locale, { icon: string; label: string; valu
     { icon: '🗓️', label: 'Jadwal & format', value: 'Segera diumumkan di #📣pengumuman' },
   ],
 };
-
-export function formatRupiah(n: number) {
-  return `Rp${n.toLocaleString('id-ID')}`;
-}

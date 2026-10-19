@@ -53,7 +53,7 @@ export const turServer: Deck = {
     {
       id: 'pengumuman',
       title: 'Cek #pengumuman secara rutin',
-      body: '**Semua pengumuman kompetisi** ada di `#📣pengumuman`: jadwal ronde, format, perubahan aturan, dan info hadiah.',
+      body: '**Semua pengumuman kompetisi** ada di `#📣pengumuman`: jadwal ronde, format, dan perubahan aturan.',
       tips: [
         {
           label: 'Biar tidak ketinggalan',

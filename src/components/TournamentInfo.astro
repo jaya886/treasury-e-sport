@@ -1,0 +1,95 @@
+---
+// Tournament info strip on the homepage.
+import { tournamentFacts } from '../data/tournament';
+import type { Locale } from '../i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+---
+
+<section class="info wrap" aria-labelledby="info-title">
+  <div class="info__card glass hud-corners">
+    <div class="info__head">
+      <p class="hud hud--yellow">// Info turnamen</p>
+      <h2 id="info-title" class="info__title display">TEC <span class="glow-yellow">2026</span></h2>
+    </div>
+    <ul class="info__facts">
+      {
+        tournamentFacts[locale].map((f) => (
+          <li>
+            <span class="info__icon" aria-hidden="true">{f.icon}</span>
+            <span>
+              <span class="hud">{f.label}</span>
+              <b>{f.value}</b>
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .info {
+    padding-top: clamp(28px, 4vw, 48px);
+  }
+
+  .info__card {
+    display: grid;
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 2fr);
+    align-items: center;
+    gap: 20px 40px;
+    padding: clamp(20px, 3vw, 32px);
+  }
+
+  .info__title {
+    margin-top: 4px;
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+
+  .info__facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 22px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .info__facts li {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .info__icon {
+    font-size: 1.3rem;
+    line-height: 1.4;
+  }
+
+  .info__facts .hud {
+    display: block;
+    font-size: 0.68rem;
+  }
+
+  .info__facts b {
+    display: block;
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
+
+  @media (max-width: 900px) {
+    .info__card {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .info__facts {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

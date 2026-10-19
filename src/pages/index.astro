@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import Ribbon from '../components/Ribbon.astro';
 import MissionMap from '../components/MissionMap.astro';
 import HeroDemo from '../components/HeroDemo.astro';
-import PrizeBanner from '../components/PrizeBanner.astro';
+import TournamentInfo from '../components/TournamentInfo.astro';
 import { meander } from '../lib/ribbon';
 import { missions, games } from '../data/missions';
 import { useTranslations, defaultLocale } from '../i18n/ui';
@@ -91,7 +91,7 @@ const why = [
     </div>
   </section>
 
-  <PrizeBanner locale={locale} />
+  <TournamentInfo locale={locale} />
 
   <section class="section section--map wrap" id="peta-misi" aria-labelledby="peta-misi-title">
     <div class="section__head">
