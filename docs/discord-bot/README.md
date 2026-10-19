@@ -8,12 +8,14 @@ set it up.
 The participant guide at <https://jaya886.github.io/treasury-e-sport/> teaches people exactly what
 these threads look like. **The bot's output must match this spec**, or the guide will be wrong.
 If you change the format here, also update the guide (see [§10](#10-keeping-the-guide-in-sync)).
+The bot is implemented in [jaya886/Tanding-bot](https://github.com/jaya886/Tanding-bot); change it together with this spec.
 
 | File | What it is |
 |---|---|
 | `README.md` | This spec |
 | `server.json` | Server layout: channels, roles, forum tags (names are exact; IDs are filled in at setup) |
-| `matches.example.csv` | Example input: one row per match |
+| `teams.example.csv` | Example roster: one row per team (or player, for solo games) |
+| `matches.example.csv` | Example input: one row per match, naming its teams |
 | `AGENT_PROMPT.md` | Ready-to-paste prompt that starts a coding agent on this task |
 
 ---
@@ -22,7 +24,7 @@ If you change the format here, also update the guide (see [§10](#10-keeping-the
 
 **Must do (phase 1)**
 
-1. Read a list of matches (CSV, §5).
+1. Read the team roster and the list of matches (CSV, §5).
 2. For each match, create **one post** in the forum channel `#🏅tec-2026` with the exact title,
    tags and opening message from §4, mentioning the players so they are added to the thread.
 3. Be **idempotent**: running it again never creates duplicates; it updates the existing post.
@@ -47,7 +49,7 @@ If you change the format here, also update the guide (see [§10](#10-keeping-the
 |---|---|---|
 | Language | TypeScript on Node 22 | Same stack as the guide repo |
 | Library | `discord.js` v14 | Python + `discord.py` 2.x is fine too if preferred |
-| Phase 1 shape | One-shot CLI: `npm run sync -- matches.csv` | Uses the REST API only; no always-on hosting needed |
+| Phase 1 shape | One-shot CLI: `npm run sync -- matches.csv teams.csv` | Uses the REST API only; no always-on hosting needed |
 | Phase 2 shape | Long-running bot (gateway) with a scheduler | Needs hosting that stays on (VPS, Railway, Fly.io, etc.) |
 | State | SQLite file or a JSON file `state.json` | Maps `match_id → thread_id`, last applied status, reminder flags |
 | Config | Environment variables (§8) | Never commit the bot token |
@@ -102,14 +104,19 @@ Fail loudly if any is missing.
 ### 4.1 Title
 
 ```
-[{GAME}] {ROUND} · {SIDE_A} vs {SIDE_B}
+[{GAME}] {ROUND} · {SIDE_A} vs {SIDE_B}                  two sides
+[{GAME}] {ROUND} · {LABEL} · {SIDE_1}, {SIDE_2}, … +N    three or more sides (a lobby)
 ```
 
 - `{GAME}` = the game tag name: `MLBB`, `PUBGM`, `MCGG`, `DOTA2`, `CATUR`, `FC27`.
-- `{ROUND}` = short round code from the input, e.g. `R1`, `R2`, `QF`, `SF`, `F`.
+- `{ROUND}` = short round code from the input, e.g. `R1`, `R2`, `QF`, `SF`, `F`. Until stages are
+  modelled, the stage goes in the code too: `SW-R3`, `GRP-A R2`, `UB-QF`, `LB-R2`, `GF`.
+- `{LABEL}` = optional, from the input (e.g. `Lobby A`); when given, it follows the round in either form.
 - Separator is ` · ` (space, U+00B7 middle dot, space).
-- `{SIDE_A}` / `{SIDE_B}` = team names for team games, player display names for solo games.
-- Max 100 characters (Discord limit). If longer, shorten the side names with `…`, never the prefix.
+- `{SIDE_…}` = team names for team games, player names for solo games, in input order.
+- Max 100 characters (Discord limit). Never shorten the prefix.
+  - Two sides: shorten the side names with `…`.
+  - Lobby: list as many whole team names as fit, then ` +N` for the rest (all teams are in the body).
 
 Examples:
 
@@ -117,13 +124,14 @@ Examples:
 [MLBB] R1 · Elang Sulsel vs Laskar Maluku
 [CATUR] R1 · Dewi vs Andi
 [DOTA2] QF · Ancient Defenders vs KPPN Five
+[PUBGM] R1 · Lobby A · Elang Sulsel, Laskar Maluku, KPPN Five, Ancient Defenders, Pinisi Squad +11
 ```
 
 Participants are taught to **search the forum by team name**, so team names must appear in the title.
 
 ### 4.2 Opening message (the post body)
 
-Plain text (no embed), Bahasa Indonesia, exactly these lines in this order:
+Plain text (no embed), Bahasa Indonesia, exactly these lines in this order. Two sides:
 
 ```
 Peserta: {MENTIONS_A} ({SIDE_A}) vs {MENTIONS_B} ({SIDE_B})
@@ -133,15 +141,33 @@ Batas lapor: <t:{DEADLINE}:R>
 Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
 ```
 
-- `{MENTIONS_A}` = space-separated user mentions `<@USER_ID>` of every player on side A (captain first).
-  If a player could not be resolved (§5.3), write their plain name instead and log it.
+Three or more sides (a lobby): the `Peserta` line becomes a numbered list, one team per line, in input order;
+the other four lines are the same.
+
+```
+Peserta:
+1. {MENTIONS_1} ({SIDE_1})
+2. {MENTIONS_2} ({SIDE_2})
+…
+Jendela main: <t:{START}:F> s/d <t:{END}:t>
+Format: {FORMAT}
+Batas lapor: <t:{DEADLINE}:R>
+Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
+```
+
+- `{MENTIONS_…}` = space-separated user mentions `<@USER_ID>` of every player on that side (captain first).
+  If a player could not be resolved (§5.4), write their plain name instead and log it.
+- **Too big to mention everyone:** if the message would exceed 2000 characters or 100 mentioned users
+  (about 17+ squads of 4), mention only each side's captain followed by the number of teammates, e.g.
+  `<@CAPTAIN_ID> +3`, and add the teammates to the post **without a ping**
+  (`PUT /channels/{THREAD_ID}/thread-members/{USER_ID}`) so it still appears in their sidebar.
 - `{START}`, `{END}`, `{DEADLINE}` = **Unix seconds**. Discord renders `<t:…>` in each viewer's
   own time zone (WIB/WITA/WIT), which the guide relies on. Never write times as plain text.
   - `:F` → "Sabtu, 14 November 2026 19.00" (full date + time)
   - `:t` → "21.00" (time only)
   - `:R` → "dalam 2 jam" (relative countdown)
 - `{FORMAT}` = from input, e.g. `Bo1`, `Bo3`, `Bo5`. For CATUR use the time control too if given, e.g. `Bo1 · 10+5`.
-- `allowed_mentions` must be `{ "parse": [], "users": [all resolved player IDs] }` so only the
+- `allowed_mentions` must be `{ "parse": [], "users": [the mentioned player IDs] }` so only the
   players get pinged (never `@everyone`, never roles). **Mentioning a user in the opening message
   adds them to the thread**, which makes it appear in their sidebar. The guide depends on this.
 
@@ -172,26 +198,35 @@ Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
 | MLBB, DOTA2 | Team vs team | Mention all players listed for each team |
 | MCGG | Player vs player | Usually 1 player per side |
 | CATUR | Player vs player | Matches are played on lichess.org. The game link is the "Match ID" |
-| PUBGM | **Multi-team lobby** | Format **not decided** (open question). Do not create PUBGM posts until §11 is answered |
-| FC27 | Offline | Whether FC27 gets threads is **not decided**. Skip unless the input explicitly includes it |
+| PUBGM | **Multi-team lobby** | One post per lobby listing every squad (§4.1, §4.2). `format` says how many games the lobby plays, e.g. `3 match`. How placements are reported is announced by the PICs |
+| FC27 | Player vs player, offline | Posts work like any 1v1 game; the committee may simply not list FC27 matches |
 
 ---
 
-## 5. Input: `matches.csv`
+## 5. Input: `teams.csv` and `matches.csv`
 
-### 5.1 Columns
+UTF-8 CSV files with a header row (comma- or semicolon-separated). Teams are entered once, in the roster;
+each match only names its teams. See `teams.example.csv` and `matches.example.csv`.
 
-UTF-8 CSV with a header row. See `matches.example.csv`.
+### 5.1 `teams.csv` columns
+
+One row per team. For solo games (CATUR, MCGG, FC27) a "team" is one player.
+
+| Column | Required | Example | Notes |
+|---|---|---|---|
+| `game` | yes | `MLBB` | One of the game tag names |
+| `name` | yes | `Elang Sulsel` | Team name (or player name for solo games). Unique per game, case-insensitive |
+| `players` | yes | `budi.makassar;andi_ppk` | Discord **usernames**, `;`-separated, **captain first** |
+
+### 5.2 `matches.csv` columns
 
 | Column | Required | Example | Notes |
 |---|---|---|---|
 | `match_id` | yes | `MLBB-R1-01` | Unique, stable. Key for idempotency |
 | `game` | yes | `MLBB` | One of the game tag names |
 | `round` | yes | `R1` | Used in the title |
-| `side_a_name` | yes | `Elang Sulsel` | Team name (team games) or player name (solo) |
-| `side_a_players` | yes | `budi.makassar;andi_ppk` | Discord **usernames**, `;`-separated, captain first |
-| `side_b_name` | yes | `Laskar Maluku` | |
-| `side_b_players` | yes | `raka.ambon` | |
+| `label` | no | `Lobby A` | Shown in the title after the round |
+| `sides` | yes | `Elang Sulsel;Laskar Maluku` | Team names from `teams.csv` (same game), `;`-separated. 2 for a normal match, more for a lobby |
 | `window_start` | yes | `2026-11-14T19:00:00+08:00` | ISO 8601 **with offset**. Committee's zone; any offset is fine |
 | `window_end` | yes | `2026-11-14T21:00:00+08:00` | Must be after start |
 | `report_deadline` | yes | `2026-11-14T23:00:00+08:00` | Must be at or after `window_end` |
@@ -199,14 +234,25 @@ UTF-8 CSV with a header row. See `matches.example.csv`.
 | `pic` | no | `sari.pic` | Discord username of the responsible PIC (for alerts only) |
 | `notes` | no | `Final ronde grup` | Not posted. For humans |
 
-### 5.2 Validation (reject the row, log it, continue with the rest)
+The original single-file layout stays accepted, without a roster: instead of `sides`, the columns
+`side_a_name`, `side_a_players`, `side_b_name`, `side_b_players` (players `;`-separated, captain first).
 
-- Missing required value, unknown `game`, duplicate `match_id`.
+### 5.3 Validation (reject the row, log it, continue with the rest)
+
+Roster:
+
+- Missing value, unknown `game`, something that is not a Discord username (e.g. a display name with spaces).
+- The same team name twice for one game (every copy is rejected), or a player on two teams of the same game.
+
+Matches:
+
+- Missing required value, unknown `game`, duplicate `match_id` (every copy is rejected).
+- `sides`: fewer than 2 teams, a team listed twice, a team not in the roster for that game, or one the roster rejected.
 - Times without an offset, `window_end <= window_start`, `report_deadline < window_end`.
-- Title longer than 100 characters after shortening.
-- `game` is `PUBGM` or `FC27` while those formats are undecided (§4.5).
+- Title longer than 100 characters after shortening, or an opening message over 2000 characters even with
+  captains only.
 
-### 5.3 Resolving players to Discord users
+### 5.4 Resolving players to Discord users
 
 The registration form (Microsoft Forms) should collect each player's **Discord username**
 (the unique handle, e.g. `budi.makassar`, not the display name).
@@ -223,7 +269,7 @@ The registration form (Microsoft Forms) should collect each player's **Discord u
 ## 6. Status lifecycle
 
 ```
-SCHEDULED ──(window_end reached)──▶ PENDING RESULTS ──(PIC)──▶ FINISHED
+SCHEDULED ──(window_start reached)──▶ PENDING RESULTS ──(PIC)──▶ FINISHED
                                           │
                                           └──(PIC)──▶ DISPUTED ──(PIC)──▶ FINISHED
 ```
@@ -231,7 +277,7 @@ SCHEDULED ──(window_end reached)──▶ PENDING RESULTS ──(PIC)──�
 | Transition | Who | When |
 |---|---|---|
 | create → `SCHEDULED` | bot | On creation |
-| `SCHEDULED` → `PENDING RESULTS` | bot (phase 2) | When `window_end` passes |
+| `SCHEDULED` → `PENDING RESULTS` | bot (phase 2) | When `window_start` is reached (play begins) |
 | → `FINISHED` / `DISPUTED` | **PIC** (manually in Discord, or via `/tec status`) | After reviewing reports |
 
 Rules:
@@ -245,7 +291,7 @@ Rules:
 
 - `report_deadline − 1 hour`, status still `PENDING RESULTS`: reply in the thread
   `⏰ Batas lapor <t:{DEADLINE}:R>. Jangan lupa kirim hasil laga di thread ini ya.`
-  mentioning both sides' players.
+  mentioning the players the opening message mentions (captains only in a captains-only lobby post).
 - `report_deadline` passed, still `PENDING RESULTS`: post in `#🏅pic-tec`:
   `⚠️ Belum ada laporan: {title} → {thread link}` (mention the match's `pic` if given).
 - Each reminder is sent once per match (store a flag in state).
@@ -259,7 +305,7 @@ All replies ephemeral, except the log line also written to `#🏅pic-tec`.
 
 | Command | Does |
 |---|---|
-| `/tec sync` with a CSV attachment | Same as the CLI: create/update posts, then reply with a summary |
+| `/tec sync` with the CSV attachments (`matches`, `teams`) | Same as the CLI: create/update posts, then reply with a summary |
 | `/tec status match_id:<id> status:<SCHEDULED\|PENDING RESULTS\|FINISHED\|DISPUTED>` | Set the status tag |
 | `/tec link match_id:<id>` | Reply with the post link |
 | `/tec check` | List matches past deadline still `PENDING RESULTS`, and unresolved players |
@@ -306,7 +352,7 @@ Do **not** request Administrator.
 
 - `Guilds`: required.
 - `GuildMembers` (privileged, enable in the Developer Portal): only if you resolve members from the
-  gateway cache. The REST member search in §5.3 does not need it.
+  gateway cache. The REST member search in §5.4 does not need it.
 - `MessageContent`: **not needed**. The bot does not read participants' messages.
 
 ---
@@ -320,6 +366,7 @@ Do **not** request Administrator.
 | Change tags / unarchive | `PATCH /channels/{THREAD_ID}` | `applied_tags`, `archived: false` |
 | Edit opening message | `PATCH /channels/{THREAD_ID}/messages/{THREAD_ID}` | `content`, `allowed_mentions` (the starter message ID equals the thread ID) |
 | Reply in post | `POST /channels/{THREAD_ID}/messages` | `content`, `allowed_mentions` |
+| Add a player to a post without a ping | `PUT /channels/{THREAD_ID}/thread-members/{USER_ID}` | (thread must not be archived) |
 | Find member | `GET /guilds/{GUILD_ID}/members/search?query=…&limit=5` | |
 
 - Respect rate limits (discord.js handles this). Space post creation ≈1 per second when bulk-creating.
@@ -345,12 +392,15 @@ what they will actually see.
 ## 11. Open questions (ask the committee before building these parts)
 
 1. **Input source:** CSV export from Excel/MS Forms is assumed. Will the bracket live in a spreadsheet the bot should read directly instead?
-2. **Who is mentioned:** all registered players of a team, or only the captain?
+2. ~~**Who is mentioned**~~ Decided: every player; captains only (others added without a ping) when a post is too big (§4.2).
 3. **Discord usernames:** does the registration form collect each player's Discord username?
-4. **PUBGM** lobby format (one post per lobby? how are placements reported?).
-5. **FC27** (offline): threads or not?
+4. ~~**PUBGM** lobby format~~ Decided: one post per lobby with every squad (§4.1, §4.2). Still open: how placements are reported.
+5. ~~**FC27** (offline)~~ Decided: posts work like any 1v1 game; listing FC27 matches is optional.
+9. **Stages and brackets** (Swiss, round robin, single/double elimination, combinations): today the stage goes
+   in the round code and the committee makes the pairings. A bracket engine that tracks results and generates
+   next rounds is planned as a later phase, after phase 2.
 6. **Reporting deadline rule:** fixed per round, or `window_end + N hours`?
-7. **Auto `PENDING RESULTS`:** at `window_end` (assumed) or at `window_start`?
+7. ~~**Auto `PENDING RESULTS`**~~ Decided: at `window_start`, when play begins.
 8. **WO handling:** confirm there will be no WO tag (assumed: PIC writes it in the thread and tags `FINISHED`).
 
 ---
@@ -368,6 +418,8 @@ Test on a **separate test server** with the same channel/tag setup before touchi
 - [ ] Re-running sync does not change a post a PIC has set to `FINISHED` or `DISPUTED`.
 - [ ] Invalid rows are reported (console + `#🏅pic-tec`) and the rest still succeed.
 - [ ] Unresolved usernames appear as plain text, are reported, and become mentions on a later sync once the player joins.
-- [ ] (Phase 2) Status moves to `PENDING RESULTS` after `window_end`; reminders fire once.
+- [ ] A lobby of 3+ teams gives one post with a numbered team list; with ~20 squads of 4 only captains are pinged and every player still sees the post in their sidebar.
+- [ ] Changing a player in `teams.csv` and re-syncing updates every post of that team and adds the new player.
+- [ ] (Phase 2) Status moves to `PENDING RESULTS` at `window_start`; reminders fire once.
 - [ ] (Phase 2) Slash commands are refused for members without `PIC TEC 2026` or `Admin`.
 - [ ] The bot token is not in the repository.

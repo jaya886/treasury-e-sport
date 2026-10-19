@@ -13,17 +13,17 @@ https://github.com/jaya886/treasury-e-sport:
 
 - `README.md`: the spec (title/message format, tags, status lifecycle, permissions, API calls, acceptance checklist)
 - `server.json`: exact channel, role and tag names, and the post template
-- `matches.example.csv`: example input
+- `teams.example.csv`, `matches.example.csv`: example input (roster + matches)
 
 Requirements:
 
 1. Follow the spec exactly. Post titles, the opening message (Bahasa Indonesia, Discord `<t:…>`
    timestamps) and tags must match §4, because participants are taught this exact format by a guide website.
-2. Build **phase 1** first: a TypeScript (Node 22, discord.js v14) CLI `npm run sync -- <matches.csv>`
+2. Build **phase 1** first: a TypeScript (Node 22, discord.js v14) CLI `npm run sync -- <matches.csv> <teams.csv>`
    that validates the CSV, resolves Discord usernames to members, and creates or updates posts idempotently
    (state file mapping `match_id → thread_id`). Support `DRY_RUN=true`.
 3. Read all IDs and the token from environment variables (§8.1). Provide `.env.example`; never commit secrets.
-4. Do not build PUBGM or FC27 handling yet (undecided, see §4.5 and §11). Reject those rows with a clear message.
+4. Support lobbies of 3+ teams (PUBGM) and the captains-only mention fallback (§4.1, §4.2). FC27 works like any 1v1 game.
 5. Never change a post whose status tag a PIC set to `FINISHED` or `DISPUTED`.
 6. Write unit tests for: CSV validation, title building/shortening, message rendering (timestamps,
    mentions, `allowed_mentions`), and the tag-replacement logic. Mock the Discord API.
