@@ -34,6 +34,8 @@ The bot is implemented in [jaya886/Tanding-bot](https://github.com/jaya886/Tandi
 
 5. Move status tags automatically (§6) and send reminders before the reporting deadline.
 6. Slash commands for PICs (§7).
+7. (Stage 3) Keep results: a PIC records them with `/tec result` or in the committee website; the bot then
+   tags the post `FINISHED` (or `DISPUTED`) and writes the result line in the thread (§6.1).
 
 **Out of scope**
 
@@ -93,7 +95,8 @@ Fail loudly if any is missing.
 | Game (exactly one per post) | `MLBB`, `PUBGM`, `MCGG`, `DOTA2`, `CATUR`, `FC27` |
 | Status (exactly one per post) | `SCHEDULED` (⏰), `PENDING RESULTS` (🟡), `FINISHED` (🟢), `DISPUTED` (🔴) |
 
-- There is **no WO tag**. A walkover is written in the thread by a PIC and the post is tagged `FINISHED`.
+- There is **no WO tag**. A walkover is written in the thread (by a PIC, or by the bot when the PIC records it with
+  `/tec result outcome:WO`, §6.1) and the post is tagged `FINISHED`.
 - A post can hold max 5 tags. The bot always applies exactly **2**: one game + one status.
 - Status tags may be marked "moderated" (only Manage Threads can apply them), so the bot needs that permission.
 
@@ -278,7 +281,7 @@ SCHEDULED ──(window_start reached)──▶ PENDING RESULTS ──(PIC)─�
 |---|---|---|
 | create → `SCHEDULED` | bot | On creation |
 | `SCHEDULED` → `PENDING RESULTS` | bot (phase 2) | When `window_start` is reached (play begins) |
-| → `FINISHED` / `DISPUTED` | **PIC** (manually in Discord, or via `/tec status`) | After reviewing reports |
+| → `FINISHED` / `DISPUTED` | **PIC** (manually in Discord, via `/tec status`, or by recording the result, §6.1) | After reviewing reports |
 
 Rules:
 
@@ -296,6 +299,24 @@ Rules:
   `⚠️ Belum ada laporan: {title} → {thread link}` (mention the match's `pic` if given).
 - Each reminder is sent once per match (store a flag in state).
 
+### 6.1 Recording a result (stage 3)
+
+A PIC (or Admin) records the result with `/tec result` (§7) or in the committee website. The bot then, in this order:
+replaces the status tag with `FINISHED` (`DISPUTED` for a held result), keeping the game tag; unarchives the post if
+needed; writes one line in the thread; and logs it in `#🏅pic-tec`. The line is what the guide shows a PIC writing
+(Misi 05, `lapor-hasil.ts`):
+
+| Result | Line in the thread |
+|---|---|
+| Played, two sides | `Hasil dicatat: **{A} {a} - {b} {B}**. Label diubah ke FINISHED. Terima kasih! 🏆` (½ for a chess draw) |
+| WO | `Hasil dicatat: **{winner} menang WO ({absent} tidak hadir)**. Label diubah ke FINISHED. Terima kasih! 🏆` |
+| Double WO | `Hasil dicatat: **WO ganda, kedua pihak dianggap kalah**. Label diubah ke FINISHED. Terima kasih! 🏆` |
+| Lobby (3+ sides) | `Hasil dicatat: **{n} game**. Label diubah ke FINISHED. Terima kasih! 🏆` (placements are kept in the website) |
+| Disputed | `Hasil laga ini **disengketakan**. {mentions} mohon kirim bukti lengkap di thread ini. PIC akan memutuskan.` (pings the players the opening message mentions) |
+
+A corrected result writes `Hasil diperbarui: **…**. Label: FINISHED.` instead. Removing a result changes nothing in
+Discord. If Discord can't be updated, the result is still kept and the PIC can send it again from the website.
+
 ---
 
 ## 7. Slash commands (phase 2)
@@ -307,6 +328,7 @@ All replies ephemeral, except the log line also written to `#🏅pic-tec`.
 |---|---|
 | `/tec sync` with the CSV attachments (`matches`, `teams`) | Same as the CLI: create/update posts, then reply with a summary |
 | `/tec status match_id:<id> status:<SCHEDULED\|PENDING RESULTS\|FINISHED\|DISPUTED>` | Set the status tag |
+| `/tec result score:<a-b> [outcome:<Played\|WO\|Double WO\|Disputed>] [winner:<side>] [report:<message link>] [match_id:<id>]` | (Stage 3) Record a two-sided match's result: kept in the website, then tag and thread line as in §6.1. `score` is in the order of the title; a WO needs `winner`. Running it again corrects the result. |
 | `/tec link match_id:<id>` | Reply with the post link |
 | `/tec check` | List matches past deadline still `PENDING RESULTS`, and unresolved players |
 
@@ -401,7 +423,7 @@ what they will actually see.
    next rounds is planned as a later phase, after phase 2.
 6. **Reporting deadline rule:** fixed per round, or `window_end + N hours`?
 7. ~~**Auto `PENDING RESULTS`**~~ Decided: at `window_start`, when play begins.
-8. **WO handling:** confirm there will be no WO tag (assumed: PIC writes it in the thread and tags `FINISHED`).
+8. ~~**WO handling**~~ Decided: no WO tag; the WO is written in the thread and the post tagged `FINISHED` (§6.1).
 
 ---
 
@@ -422,4 +444,5 @@ Test on a **separate test server** with the same channel/tag setup before touchi
 - [ ] Changing a player in `teams.csv` and re-syncing updates every post of that team and adds the new player.
 - [ ] (Phase 2) Status moves to `PENDING RESULTS` at `window_start`; reminders fire once.
 - [ ] (Phase 2) Slash commands are refused for members without `PIC TEC 2026` or `Admin`.
+- [ ] (Stage 3) `/tec result score:2-1` inside a post tags it `FINISHED` (game tag kept) and writes the §6.1 line once.
 - [ ] The bot token is not in the repository.
