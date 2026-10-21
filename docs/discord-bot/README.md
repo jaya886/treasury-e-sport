@@ -164,6 +164,8 @@ Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
   `teams.csv`), write it after the mention, and separate that side's players with `, `:
   `<@111> Budi Santoso, <@222> Andi Wijaya`. Leave it out in solo games where the side is already named after the
   player.
+  **Members without a Discord username** (known only by name) are listed by name after the mentioned players:
+  `<@111> Budi Santoso, <@222> Andi Wijaya, Rina Kartika`. They can't be mentioned, so they aren't pinged or added.
 - **Too big to mention everyone:** if the message would exceed 2000 characters or 100 mentioned users
   (about 17+ squads of 4), mention only each side's captain followed by the number of teammates, e.g.
   `<@CAPTAIN_ID> +3`, and add the teammates to the post **without a ping**
@@ -227,6 +229,7 @@ One row per team. For solo games (CATUR, MCGG, FC27) a "team" is one player.
 | `name` | yes | `Elang Sulsel` | Team name (or player name for solo games). Unique per game, case-insensitive |
 | `players` | yes | `budi.makassar;andi_ppk` | Discord **usernames**, `;`-separated, **captain first** |
 | `names` | no | `Budi Santoso;Andi Wijaya` | Real names in the same order as `players` (blank = none), written after each mention (§4.2) |
+| `others` | no | `Rina Kartika;Fajar` | Members without a Discord username, by name, `;`-separated; listed after the players (§4.2) |
 
 ### 5.2 `matches.csv` columns
 
