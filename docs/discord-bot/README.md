@@ -138,7 +138,7 @@ Plain text (no embed), Bahasa Indonesia, exactly these lines in this order. Two 
 
 ```
 Peserta: {MENTIONS_A} ({SIDE_A}) vs {MENTIONS_B} ({SIDE_B})
-Jendela main: <t:{START}:F> s/d <t:{END}:t>
+Jendela main: <t:{START}:F> s/d <t:{END}:{END_STYLE}>
 Format: {FORMAT}
 Batas lapor: <t:{DEADLINE}:R>
 Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
@@ -152,7 +152,7 @@ Peserta:
 1. {MENTIONS_1} ({SIDE_1})
 2. {MENTIONS_2} ({SIDE_2})
 …
-Jendela main: <t:{START}:F> s/d <t:{END}:t>
+Jendela main: <t:{START}:F> s/d <t:{END}:{END_STYLE}>
 Format: {FORMAT}
 Batas lapor: <t:{DEADLINE}:R>
 Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
@@ -160,6 +160,12 @@ Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
 
 - `{MENTIONS_…}` = space-separated user mentions `<@USER_ID>` of every player on that side (captain first).
   If a player could not be resolved (§5.4), write their plain name instead and log it.
+  **Real names:** when a player's real name is known (the committee website's roster, or the `names` column of
+  `teams.csv`), write it after the mention, and separate that side's players with `, `:
+  `<@111> Budi Santoso, <@222> Andi Wijaya`. Leave it out in solo games where the side is already named after the
+  player.
+  **Members without a Discord username** (known only by name) are listed by name after the mentioned players:
+  `<@111> Budi Santoso, <@222> Andi Wijaya, Rina Kartika`. They can't be mentioned, so they aren't pinged or added.
 - **Too big to mention everyone:** if the message would exceed 2000 characters or 100 mentioned users
   (about 17+ squads of 4), mention only each side's captain followed by the number of teammates, e.g.
   `<@CAPTAIN_ID> +3`, and add the teammates to the post **without a ping**
@@ -168,6 +174,8 @@ Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
   own time zone (WIB/WITA/WIT), which the guide relies on. Never write times as plain text.
   - `:F` → "Sabtu, 14 November 2026 19.00" (full date + time)
   - `:t` → "21.00" (time only)
+  - `{END_STYLE}` = `t` when the window ends on the day it starts in WIB, WITA and WIT; otherwise `F`, so a window
+    over several days reads e.g. "Sabtu, 14 November 2026 19.00 s/d Senin, 16 November 2026 21.00".
   - `:R` → "dalam 2 jam" (relative countdown)
 - `{FORMAT}` = from input, e.g. `Bo1`, `Bo3`, `Bo5`. For CATUR use the time control too if given, e.g. `Bo1 · 10+5`.
 - `allowed_mentions` must be `{ "parse": [], "users": [the mentioned player IDs] }` so only the
@@ -177,7 +185,7 @@ Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
 Rendered example (what a participant in Makassar sees):
 
 ```
-Peserta: @Budi | KPPN Makassar I (Elang Sulsel) vs @Raka | KPPN Ambon (Laskar Maluku)
+Peserta: @Budi | KPPN Makassar I Budi Santoso (Elang Sulsel) vs @Raka | KPPN Ambon Raka Pratama (Laskar Maluku)
 Jendela main: Sabtu, 14 November 2026 19.00 s/d 21.00
 Format: Bo3
 Batas lapor: dalam 2 jam
@@ -220,6 +228,8 @@ One row per team. For solo games (CATUR, MCGG, FC27) a "team" is one player.
 | `game` | yes | `MLBB` | One of the game tag names |
 | `name` | yes | `Elang Sulsel` | Team name (or player name for solo games). Unique per game, case-insensitive |
 | `players` | yes | `budi.makassar;andi_ppk` | Discord **usernames**, `;`-separated, **captain first** |
+| `names` | no | `Budi Santoso;Andi Wijaya` | Real names in the same order as `players` (blank = none), written after each mention (§4.2) |
+| `others` | no | `Rina Kartika;Fajar` | Members without a Discord username, by name, `;`-separated; listed after the players (§4.2) |
 
 ### 5.2 `matches.csv` columns
 

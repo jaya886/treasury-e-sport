@@ -28,7 +28,7 @@ export function post(overrides: Partial<SimPost> = {}): SimPost {
     author: 'sari',
     time: 'Kemarin 09.00',
     text: [
-      'Peserta: <@budi> (Elang Sulsel) vs <@raka> (Laskar Maluku)',
+      'Peserta: <@budi> Budi Santoso (Elang Sulsel) vs <@raka> Raka Pratama (Laskar Maluku)',
       'Jendela main: [ts:Sabtu, 14 November 2026 19.00] s/d [ts:21.00]',
       'Format: Bo3',
       'Batas lapor: [ts:dalam 2 jam]',
