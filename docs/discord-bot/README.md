@@ -134,28 +134,31 @@ Participants are taught to **search the forum by team name**, so team names must
 
 ### 4.2 Opening message (the post body)
 
-Plain text (no embed), Bahasa Indonesia, exactly these lines in this order. Two sides:
+Plain text (no embed), Bahasa Indonesia, exactly these lines in this order, each starting with its emoji, and a
+closing GLHF line. Two sides:
 
 ```
-Peserta: {MENTIONS_A} ({SIDE_A}) vs {MENTIONS_B} ({SIDE_B})
-Jendela main: <t:{START}:F> s/d <t:{END}:{END_STYLE}>
-Format: {FORMAT}
-Batas lapor: <t:{DEADLINE}:R>
-Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
+👥 Peserta: {MENTIONS_A} ({SIDE_A}) vs {MENTIONS_B} ({SIDE_B})
+🗓️ Jendela main: <t:{START}:F> s/d <t:{END}:{END_STYLE}>
+🎮 Format: {FORMAT}
+⏳ Batas lapor: <t:{DEADLINE}:R>
+📸 Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
+GLHF! 🔥 Sepakati jam main di thread ini, lalu kirim hasilnya di sini.
 ```
 
 Three or more sides (a lobby): the `Peserta` line becomes a numbered list, one team per line, in input order;
-the other four lines are the same.
+the other lines are the same.
 
 ```
-Peserta:
+👥 Peserta:
 1. {MENTIONS_1} ({SIDE_1})
 2. {MENTIONS_2} ({SIDE_2})
 …
-Jendela main: <t:{START}:F> s/d <t:{END}:{END_STYLE}>
-Format: {FORMAT}
-Batas lapor: <t:{DEADLINE}:R>
-Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
+🗓️ Jendela main: <t:{START}:F> s/d <t:{END}:{END_STYLE}>
+🎮 Format: {FORMAT}
+⏳ Batas lapor: <t:{DEADLINE}:R>
+📸 Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
+GLHF! 🔥 Sepakati jam main di thread ini, lalu kirim hasilnya di sini.
 ```
 
 - `{MENTIONS_…}` = space-separated user mentions `<@USER_ID>` of every player on that side (captain first).
@@ -185,11 +188,12 @@ Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
 Rendered example (what a participant in Makassar sees):
 
 ```
-Peserta: @Budi | KPPN Makassar I Budi Santoso (Elang Sulsel) vs @Raka | KPPN Ambon Raka Pratama (Laskar Maluku)
-Jendela main: Sabtu, 14 November 2026 19.00 s/d 21.00
-Format: Bo3
-Batas lapor: dalam 2 jam
-Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
+👥 Peserta: @Budi | KPPN Makassar I Budi Santoso (Elang Sulsel) vs @Raka | KPPN Ambon Raka Pratama (Laskar Maluku)
+🗓️ Jendela main: Sabtu, 14 November 2026 19.00 s/d 21.00
+🎮 Format: Bo3
+⏳ Batas lapor: dalam 2 jam
+📸 Cara lapor: https://jaya886.github.io/treasury-e-sport/misi/lapor-hasil/
+GLHF! 🔥 Sepakati jam main di thread ini, lalu kirim hasilnya di sini.
 ```
 
 ### 4.3 Tags on creation
@@ -303,7 +307,7 @@ Rules:
 **Reminders (phase 2)**
 
 - `report_deadline − 1 hour`, status still `PENDING RESULTS`: reply in the thread
-  `⏰ Batas lapor <t:{DEADLINE}:R>. Jangan lupa kirim hasil laga di thread ini ya.`
+  `⏰ Batas lapor <t:{DEADLINE}:R>! Sudah GG? Kirim hasil + screenshot di sini ya. Belum main? Gas sekarang! 🎮`
   mentioning the players the opening message mentions (captains only in a captains-only lobby post).
 - `report_deadline` passed, still `PENDING RESULTS`: post in `#🏅pic-tec`:
   `⚠️ Belum ada laporan: {title} → {thread link}` (mention the match's `pic` if given).
@@ -313,18 +317,20 @@ Rules:
 
 A PIC (or Admin) records the result with `/tec result` (§7) or in the committee website. The bot then, in this order:
 replaces the status tag with `FINISHED` (`DISPUTED` for a held result), keeping the game tag; unarchives the post if
-needed; writes one line in the thread; and logs it in `#🏅pic-tec`. The line is what the guide shows a PIC writing
-(Misi 05, `lapor-hasil.ts`):
+needed; writes one line in the thread; and logs it in `#🏅pic-tec`. The guide shows these lines (Misi 05,
+`lapor-hasil.ts`):
 
 | Result | Line in the thread |
 |---|---|
-| Played, two sides | `Hasil dicatat: **{A} {a} - {b} {B}**. Label diubah ke FINISHED. Terima kasih! 🏆` (½ for a chess draw) |
-| WO | `Hasil dicatat: **{winner} menang WO ({absent} tidak hadir)**. Label diubah ke FINISHED. Terima kasih! 🏆` |
-| Double WO | `Hasil dicatat: **WO ganda, kedua pihak dianggap kalah**. Label diubah ke FINISHED. Terima kasih! 🏆` |
-| Lobby (3+ sides) | `Hasil dicatat: **{n} game**. Label diubah ke FINISHED. Terima kasih! 🏆` (placements are kept in the website) |
-| Disputed | `Hasil laga ini **disengketakan**. {mentions} mohon kirim bukti lengkap di thread ini. PIC akan memutuskan.` (pings the players the opening message mentions) |
+| Played, two sides, a winner | `🏆 GG! Hasil dicatat: **{A} {a} - {b} {B}**. Selamat buat **{winner}**! 🎉` |
+| Played, two sides, a draw | `🤝 GG! Seri: **{A} {a} - {b} {B}**.` (½ for a chess draw) |
+| WO | `🏳️ **{winner}** menang WO ({absent} tidak hadir).` |
+| Double WO | `🏳️ **WO ganda**: kedua pihak dianggap kalah.` |
+| Lobby (3+ sides) | `🏆 GG! Hasil dicatat ({n} game).` (placements are kept in the website) |
+| Disputed | `🔴 Hasil laga ini **disengketakan**. {mentions} kirim bukti lengkap (screenshot/rekaman) di sini ya. PIC akan memutuskan. Tetap sportif! 🤝` (pings the players the opening message mentions) |
 
-A corrected result writes `Hasil diperbarui: **…**. Label: FINISHED.` instead. Removing a result changes nothing in
+A corrected result writes `✏️ Hasil diperbarui: **{summary}**.` instead (e.g. `Elang Sulsel 1 - 2 Laskar Maluku`,
+`Elang Sulsel menang WO (Laskar Maluku tidak hadir)`). Removing a result changes nothing in
 Discord. If Discord can't be updated, the result is still kept and the PIC can send it again from the website.
 
 ---

@@ -17,7 +17,7 @@ const disputed = () =>
         id: 's-2',
         author: 'sari',
         time: 'Hari ini 20.22',
-        text: 'Hasil laga ini **disengketakan**. <@budi> <@raka> mohon kirim bukti lengkap di thread ini.',
+        text: '🔴 Hasil laga ini **disengketakan**. <@budi> <@raka> kirim bukti lengkap (screenshot/rekaman) di sini ya. PIC akan memutuskan. Tetap sportif! 🤝',
       },
     ],
   });
